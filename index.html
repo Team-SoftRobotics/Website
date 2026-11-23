@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SCPA | Soft Continuum Proprioceptive Arm</title>
+  <meta name="description" content="Research platform for the Soft Continuum Proprioceptive Arm (SCPA) — featuring embedded proprioceptive strain sensing, continuum kinematics, and camera-free 3D shape reconstruction." />
+  
+  <meta property="og:title" content="Soft Continuum Proprioceptive Arm (SCPA)" />
+  <meta property="og:description" content="Advanced soft robotics research platform with embedded proprioceptive sensing and closed-loop shape reconstruction." />
+  <meta property="og:type" content="website" />
+
+  <!-- Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Navigation Bar (Deep Navy) -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="#" class="brand-logo" aria-label="SCPA Home">
+        <div class="logo-symbol">
+          <svg viewBox="0 0 32 32" width="26" height="26" fill="none">
+            <path d="M6 26C8 18 12 12 18 10C24 8 26 4 26 4" stroke="#5289AD" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="26" cy="4" r="3" fill="#F4FCFB"/>
+            <circle cx="18" cy="10" r="2.5" fill="#ACBCBF"/>
+            <circle cx="6" cy="26" r="3" fill="#5289AD"/>
+          </svg>
+        </div>
+        <div class="brand-meta">
+          <span class="brand-title">SCPA</span>
+        </div>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#about">Overview</a>
+        <a href="#simulator">Kinematics Studio</a>
+        <a href="#architecture">Subsystems</a>
+        <a href="#hardware">CAD & Hardware</a>
+        <a href="#updates">Research Log</a>
+        <a href="#team">Team</a>
+        <a href="#publications">BibTeX</a>
+        <a href="#connect">Connect</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://github.com/Team-SoftRobotics/Website" target="_blank" rel="noopener noreferrer" class="nav-github-btn">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          <span>Repository</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO SECTION (Editorial, Asymmetric) -->
+    <section class="hero-section">
+      <div class="container hero-layout">
+        
+        <!-- Left: Hero Text & Narrative -->
+        <div class="hero-text-col">
+          <div class="institution-kicker">
+            <img src="images/research/bits-pilani-logo.jpg" alt="BITS Pilani Seal" class="institution-seal-micro" />
+            <span>BIRLA INSTITUTE OF TECHNOLOGY & SCIENCE (BITS), PILANI</span>
+          </div>
+
+          <div class="hero-kicker-wrap">
+            <span class="kicker-dot"></span>
+            <span class="kicker-text">Dual-Stage Continuum Robotics • Invention Disclosure Platform</span>
+          </div>
+
+          <h1 class="hero-heading">
+            Soft Continuum <br />
+            <span class="accent-title">Proprioceptive Arm</span>
+          </h1>
+
+          <p class="hero-summary">
+            A single integrated continuum robotic platform combining a superelastic notched Nitinol outer tube 
+            for large macro positioning, an inner telescoping disk arm for fine tip dexterity, distributed Fiber Bragg Grating (FBG) 
+            optical shape sensing, a soft compliant gripper, and an intuitive hand-worn teleoperation master controller.
+          </p>
+
+          <div class="hero-cta-bar">
+            <a href="https://github.com/Team-SoftRobotics/Website" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+              </svg>
+              <span>View Repository</span>
+            </a>
+            <a href="#architecture" class="btn btn-secondary">
+              <span>Explore Subsystems</span>
+            </a>
+          </div>
+
+          <!-- Minimal Editorial Metrics Row -->
+          <div class="hero-metrics-strip">
+            <div class="metric-item">
+              <span class="metric-label">Kinematic Stages</span>
+              <span class="metric-value">Dual-Stage Coaxial (Macro + Micro)</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Proprioception</span>
+              <span class="metric-value">Distributed FBG Optical Strain</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Actuation / Controller</span>
+              <span class="metric-value">Dual ESP32 Teleoperation</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Real-Time Interactive Continuum Arm Simulator -->
+        <div class="hero-viz-col">
+          <div class="simulator-hud">
+            <div class="hud-header">
+              <div class="hud-header-title">
+                <span class="status-indicator"></span>
+                <span>KINEMATICS SIMULATOR [LIVE]</span>
+              </div>
+              <button id="toggle-sim-mode" class="hud-mode-btn" title="Toggle between auto-sweep and interactive cursor tracking">
+                <span id="sim-mode-text">Mode: Interactive</span>
+              </button>
+            </div>
+
+            <div class="canvas-frame">
+              <canvas id="continuum-canvas"></canvas>
+              <div class="canvas-hint">
+                <span>Move cursor over canvas to flex arm</span>
+              </div>
+            </div>
+
+            <div class="hud-telemetry-row">
+              <div class="tel-cell">
+                <span class="tel-name">Tip Position (X, Y)</span>
+                <span class="tel-stat font-mono" id="tel-pos">0.0, 0.0 mm</span>
+              </div>
+              <div class="tel-cell">
+                <span class="tel-name">Mean Curvature (κ)</span>
+                <span class="tel-stat font-mono" id="tel-curvature">0.000 rad/mm</span>
+              </div>
+              <div class="tel-cell">
+                <span class="tel-name">Differential Strain</span>
+                <span class="tel-stat font-mono text-accent" id="tel-strain">Δε: +0.00%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- RESEARCH OVERVIEW & SPECIFICATIONS -->
+    <section id="about" class="section section-alt">
+      <div class="container">
+        <div class="section-header-wrap">
+          <span class="eyebrow">Scientific Foundation</span>
+          <h2 class="section-title-editorial">Motivation & Technical Innovations</h2>
+          <p class="section-desc-editorial">Addressing foundational trade-offs in continuum robotics: reach vs. dexterity, shape estimation errors, and intuitive control.</p>
+        </div>
+
+        <div class="about-editorial-grid">
+          <div class="about-narrative">
+            <h3>Overcoming the Limitations of State-of-the-Art Continuum Robots</h3>
+            <p>
+              Traditional continuum manipulators suffer from four chronic engineering limitations:
+              <strong>(i) Single-stage trade-off:</strong> a single flexible backbone must provide both gross positioning and fine tip orientation, forcing an unavoidable compromise between workspace reach and dexterous manipulation;
+              <strong>(ii) Indirect shape sensing:</strong> estimating deformation from motor encoder counts or tendon pull lengths produces severe inaccuracies due to tendon friction, compliance, elongation, backlash, and unmodelled external contact loads;
+              <strong>(iii) Rigid end-effectors:</strong> conventional metallic grippers fail to adapt to delicate or irregularly shaped biological tissue; and
+              <strong>(iv) Unintuitive control:</strong> driving individual actuators via joysticks requires steep cognitive loads.
+            </p>
+            <p>
+              <strong>The Soft Continuum Proprioceptive Arm (SCPA)</strong> resolves all four challenges in a single integrated system developed at 
+              <strong>BITS Pilani</strong>: a two-stage coaxial architecture (notched Nitinol outer tube + telescoping inner disk arm), embedded Fiber Bragg Grating (FBG) optical shape sensors for direct proprioception immune to electromagnetic interference, a compliant tendon-actuated gripper, and a hand-worn teleoperation master controller mapping human finger joints directly to robot motion.
+            </p>
+
+            <!-- Three Pillars (Clean Row) -->
+            <div class="pillars-row">
+              <div class="pillar-col">
+                <span class="pillar-num">01</span>
+                <h4>Dual-Stage Decoupling</h4>
+                <p>Outer notched Nitinol tube handles macro-scale trajectory navigation while the telescoping inner arm executes fine surgical micro-dexterity.</p>
+              </div>
+              <div class="pillar-col">
+                <span class="pillar-num">02</span>
+                <h4>Direct Optical Proprioception</h4>
+                <p>Embedded Fiber Bragg Grating (FBG) optical fibers measure true 3D spatial curvature directly, eliminating tendon slack and backlash errors.</p>
+              </div>
+              <div class="pillar-col">
+                <span class="pillar-num">03</span>
+                <h4>Intuitive Wearable Master</h4>
+                <p>Hand-worn controller with joint rotary encoders turns natural operator finger movements directly into coordinated multi-stage motion.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Technical Specs Column -->
+          <div class="specs-panel">
+            <h3>Technical Specifications</h3>
+            <table class="specs-data-list">
+              <tbody>
+                <tr>
+                  <td>Kinematic Architecture</td>
+                  <td>Dual-Stage Coaxial Telescoping</td>
+                </tr>
+                <tr>
+                  <td>Outer Stage (NCM)</td>
+                  <td>Superelastic Nitinol (Auxetic Notched Wall)</td>
+                </tr>
+                <tr>
+                  <td>Inner Stage ("Doc Oc")</td>
+                  <td>Resin Disks on Central Superelastic Nitinol Column</td>
+                </tr>
+                <tr>
+                  <td>Tendon Cables</td>
+                  <td>High-Tensile Kevlar Fibres (4-Tendon Antagonistic)</td>
+                </tr>
+                <tr>
+                  <td>Shape Sensing</td>
+                  <td>Distributed Fiber Bragg Grating (FBG) Optical Array</td>
+                </tr>
+                <tr>
+                  <td>Sensing Immunity</td>
+                  <td>100% Immune to Electromagnetic Interference (EMI)</td>
+                </tr>
+                <tr>
+                  <td>Gripper End-Effector</td>
+                  <td>Soft Compliant 2-Claw Tendon-Actuated Mechanism</td>
+                </tr>
+                <tr>
+                  <td>Master Controller</td>
+                  <td>Wearable Hand-Worn Exoskeleton with Rotary Encoders</td>
+                </tr>
+                <tr>
+                  <td>Actuation & Compute</td>
+                  <td>Base NEMA Steppers + Dual ESP32 Microcontrollers</td>
+                </tr>
+                <tr>
+                  <td>Assignee & Origin</td>
+                  <td>BITS Pilani (Dept. of Electrical & Electronics Eng.)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEEP NAVY SECTION: KINEMATICS & BENDING PARAMETER STUDIO -->
+    <section id="simulator" class="section section-dark">
+      <div class="container">
+        <div class="section-header-wrap">
+          <span class="eyebrow eyebrow-dark">Laboratory Simulation</span>
+          <h2 class="section-title-editorial">Kinematics & Parameter Studio</h2>
+          <p class="section-desc-editorial" style="color: var(--soft-gray);">
+            Manually calibrate segment curvatures and observe the real-time differential strain response.
+          </p>
+        </div>
+
+        <div class="studio-grid">
+          <div class="controls-col">
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="seg1-slider">Proximal Segment Curvature (κ₁)</label>
+                <span id="seg1-val" class="slider-val-readout">0.00 rad</span>
+              </div>
+              <input type="range" id="seg1-slider" min="-1.2" max="1.2" step="0.01" value="0.0" />
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="seg2-slider">Medial Segment Curvature (κ₂)</label>
+                <span id="seg2-val" class="slider-val-readout">0.00 rad</span>
+              </div>
+              <input type="range" id="seg2-slider" min="-1.5" max="1.5" step="0.01" value="0.0" />
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="seg3-slider">Distal Segment Curvature (κ₃)</label>
+                <span id="seg3-val" class="slider-val-readout">0.00 rad</span>
+              </div>
+              <input type="range" id="seg3-slider" min="-1.8" max="1.8" step="0.01" value="0.0" />
+            </div>
+
+            <div class="preset-actions-row">
+              <button id="btn-reset-sliders" class="btn-ghost-dark">Reset Neutral</button>
+              <button id="btn-preset-s-curve" class="btn-ghost-dark">S-Curve Preset</button>
+              <button id="btn-preset-spiral" class="btn-ghost-dark">Coil Preset</button>
+            </div>
+          </div>
+
+          <div class="data-reconstruction-col">
+            <h4>Reconstructed Proprioceptive State</h4>
+            <div class="readout-list font-mono">
+              <div class="readout-line">
+                <span class="readout-key">Dorsal Channel Strain:</span>
+                <span id="strain-dorsal" class="readout-val">0.00 %</span>
+              </div>
+              <div class="readout-line">
+                <span class="readout-key">Ventral Channel Strain:</span>
+                <span id="strain-ventral" class="readout-val">0.00 %</span>
+              </div>
+              <div class="readout-line">
+                <span class="readout-key">Tip Workspace Angle:</span>
+                <span id="tip-angle" class="readout-val">0.0°</span>
+              </div>
+              <div class="readout-line">
+                <span class="readout-key">State Confidence:</span>
+                <span class="readout-val" style="color: var(--soft-gray);">99.4% (Nominal)</span>
+              </div>
+            </div>
+            <p class="studio-footnote">
+              *Differential strain ratios between opposing dorsal and ventral sensor lines establish 
+              curvature determination without expensive numeric iterative solvers.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SYSTEM ARCHITECTURE: 5 INTEGRATED SUB-SYSTEMS -->
+    <section id="architecture" class="section">
+      <div class="container">
+        <div class="section-header-wrap">
+          <span class="eyebrow">System Architecture</span>
+          <h2 class="section-title-editorial">Five Integrated Subsystems</h2>
+          <p class="section-desc-editorial">Comprehensive subsystem architecture formalizing the mechanical, optical, and control innovations of the SCPA.</p>
+        </div>
+
+        <div class="subsystems-grid">
+          <!-- Subsystem A -->
+          <div class="subsystem-card">
+            <div class="subsystem-badge-row">
+              <span class="subsystem-code">SUBSYSTEM A</span>
+              <span class="subsystem-stage">Outer Stage • Macro Movement</span>
+            </div>
+            <h3>Notched Continuum Manipulator (NCM)</h3>
+            <p>
+              A hollow tube of superelastic Nitinol fabricated with repeating re-entrant / auxetic laser-cut notches. 
+              The geometry locally removes material to permit agile, high-deflection bending while preserving robust torsional 
+              rigidity and elastic spring-return memory.
+            </p>
+            <ul class="subsystem-specs">
+              <li><strong>Material:</strong> Superelastic Nitinol alloy tube</li>
+              <li><strong>Actuation:</strong> 4 high-tensile Kevlar tendons anchored distally</li>
+              <li><strong>Kinematic Role:</strong> Gross anatomical positioning and obstacle avoidance</li>
+            </ul>
+          </div>
+
+          <!-- Subsystem B -->
+          <div class="subsystem-card">
+            <div class="subsystem-badge-row">
+              <span class="subsystem-code">SUBSYSTEM B</span>
+              <span class="subsystem-stage">Inner Stage • Micro Dexterity</span>
+            </div>
+            <h3>Disk-Based Continuum Arm ("Doc Oc")</h3>
+            <p>
+              A multi-link, tentacle-inspired manipulator comprising precision resin disks threaded along a central 
+              superelastic Nitinol column. Housed coaxially inside the outer Nitinol tube, it extends and retracts telescopically 
+              to provide decoupled high-dexterity micro-articulation at the tip.
+            </p>
+            <ul class="subsystem-specs">
+              <li><strong>Structure:</strong> Precision resin guide disks on Nitinol core</li>
+              <li><strong>Telescoping:</strong> Independent axial translation and curvature control</li>
+              <li><strong>Kinematic Role:</strong> Fine surgical orientation and workspace reach</li>
+            </ul>
+          </div>
+
+          <!-- Subsystem C -->
+          <div class="subsystem-card">
+            <div class="subsystem-badge-row">
+              <span class="subsystem-code">SUBSYSTEM C</span>
+              <span class="subsystem-stage">End-Effector • Delicate Handling</span>
+            </div>
+            <h3>Soft Compliant Tendon Gripper</h3>
+            <p>
+              A two-claw compliant gripper mounted at the distal tip of the inner arm. Tendon-actuated closure combined with 
+              soft elastomeric jaw compliance allows the mechanism to conform passively around fragile biological tissue 
+              or delicate objects without causing crush trauma.
+            </p>
+            <ul class="subsystem-specs">
+              <li><strong>Mechanism:</strong> Antagonistic tendon closure with passive spring opening</li>
+              <li><strong>Material:</strong> Compliant elastomer conforming to irregular surfaces</li>
+              <li><strong>Safety:</strong> Passive force-limiting contact geometry</li>
+            </ul>
+          </div>
+
+          <!-- Subsystem D -->
+          <div class="subsystem-card">
+            <div class="subsystem-badge-row">
+              <span class="subsystem-code">SUBSYSTEM D</span>
+              <span class="subsystem-stage">Sensory System • Distributed Shape</span>
+            </div>
+            <h3>Fiber Bragg Grating (FBG) Optical Proprioception</h3>
+            <p>
+              Distributed optical fibers inscribed with Fiber Bragg Gratings (FBGs) routed along both the outer notched tube 
+              and inner disk arm. By interrogating reflected optical wavelength shifts, the system measures true localized strain 
+              and reconstructs the complete 3D continuous profile in real time.
+            </p>
+            <ul class="subsystem-specs">
+              <li><strong>Principle:</strong> Optical wavelength shift under localized tensile strain</li>
+              <li><strong>Advantages:</strong> 100% immune to EMI, tendon stretch, friction, or backlash</li>
+              <li><strong>Sampling:</strong> High-speed interrogator for closed-loop shape control</li>
+            </ul>
+          </div>
+
+          <!-- Subsystem E -->
+          <div class="subsystem-card">
+            <div class="subsystem-badge-row">
+              <span class="subsystem-code">SUBSYSTEM E</span>
+              <span class="subsystem-stage">Teleoperation • Human Interface</span>
+            </div>
+            <h3>Hand-Worn Master Controller</h3>
+            <p>
+              An ergonomic wearable master exoskeleton into which the human operator places their hand. High-resolution 
+              rotary encoders mounted across the finger joints measure natural human finger articulation and translate them 
+              directly into target motor coordinates.
+            </p>
+            <ul class="subsystem-specs">
+              <li><strong>Sensors:</strong> Multi-axis precision rotary encoders at finger joints</li>
+              <li><strong>Mapping:</strong> Direct joint-angle to tendon-displacement translation</li>
+              <li><strong>Ergonomics:</strong> Low cognitive burden master-slave teleoperation</li>
+            </ul>
+          </div>
+
+          <!-- Actuation & Control -->
+          <div class="subsystem-card">
+            <div class="subsystem-badge-row">
+              <span class="subsystem-code">ACTUATION & COMPUTE</span>
+              <span class="subsystem-stage">Drive Unit • Closed-Loop</span>
+            </div>
+            <h3>Base Drive Array & Dual ESP32 Controller</h3>
+            <p>
+              High-torque NEMA stepper motors coupled to dedicated microstepping drivers actuate the Kevlar tendon cabling. 
+              Dual ESP32 microcontrollers coordinate encoder signal ingestion, optical sensor telemetry fusion, and real-time 
+              step generation while keeping the working end ultra-slender and lightweight.
+            </p>
+            <ul class="subsystem-specs">
+              <li><strong>Motors:</strong> Base-mounted NEMA stepper array pulling Kevlar tendons</li>
+              <li><strong>Microcontroller:</strong> Dual ESP32 architecture running closed-loop firmware</li>
+              <li><strong>Topology:</strong> Proximal actuation preserving slender distal profile</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- APPLICATIONS STRIP -->
+        <div class="hardware-gallery-header" style="margin-top: 3.5rem;">
+          <h3 class="hardware-gallery-title">Primary Clinical & Industrial Applications</h3>
+          <span class="hardware-gallery-tag">BITS Pilani Patent Disclosure Scope</span>
+        </div>
+
+        <div class="applications-grid">
+          <div class="app-card">
+            <svg class="app-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+            </svg>
+            <h4>Minimally Invasive Surgery (MIS)</h4>
+            <p>
+              Entering through small incisions or natural orifices (NOTES), navigating tortuous anatomical pathways, 
+              and performing dexterous, non-traumatic tissue manipulation with live optical proprioception.
+            </p>
+          </div>
+
+          <div class="app-card">
+            <svg class="app-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            <h4>Confined-Space Inspection & Repair</h4>
+            <p>
+              Navigating inside jet engines, curved industrial pipelines, nuclear reactors, and hazardous structures 
+              where rigid robots cannot pass without extensive equipment disassembly.
+            </p>
+          </div>
+
+          <div class="app-card">
+            <svg class="app-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1 1 0 0 1-2 0V7a1 1 0 0 1 2 0z"/>
+            </svg>
+            <h4>Search & Rescue & Fragile Manipulation</h4>
+            <p>
+              Threading compliant arms through rubble in collapsed disaster structures and handling delicate objects 
+              in cleanrooms and laboratories with passive contact safety.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- HARDWARE, CAD & PROTOTYPE GALLERY -->
+    <section id="hardware" class="section section-alt">
+      <div class="container">
+        <div class="section-header-wrap">
+          <span class="eyebrow">Engineering Drawings & Bench Prototypes</span>
+          <h2 class="section-title-editorial">Hardware, CAD & Laboratory Validation</h2>
+          <p class="section-desc-editorial">Authentic engineering schematics, mechanical CAD assemblies, and prototype test rigs from BITS Pilani.</p>
+        </div>
+
+        <div class="cad-gallery-grid">
+          <!-- Fig 1: Dual Stage Assembly -->
+          <div class="cad-figure-card" title="Click to enlarge technical drawing">
+            <div class="cad-img-wrapper">
+              <img src="images/research/ncm-telescoping-dococ.png" alt="Dual-Stage Coaxial Notched Tube & Doc Oc Arm" />
+            </div>
+            <div class="cad-caption-box">
+              <div class="cad-meta-row">
+                <span class="cad-fig-num">FIG. 01</span>
+                <span class="cad-fig-type">Mechanical Assembly</span>
+              </div>
+              <h4 class="cad-fig-title">Dual-Stage Notched Tube & Telescoping Arm</h4>
+              <p class="cad-fig-desc">Coaxial integration of the auxetic notched Nitinol tube (outer stage) with the inner disk continuum arm extending from its bore.</p>
+            </div>
+          </div>
+
+          <!-- Fig 2: Controller CAD -->
+          <div class="cad-figure-card" title="Click to enlarge technical drawing">
+            <div class="cad-img-wrapper">
+              <img src="images/research/controller-assembly-cad.png" alt="Hand-Worn Controller CAD Assembly Sheet" />
+            </div>
+            <div class="cad-caption-box">
+              <div class="cad-meta-row">
+                <span class="cad-fig-num">FIG. 02</span>
+                <span class="cad-fig-type">CAD Drafting Sheet</span>
+              </div>
+              <h4 class="cad-fig-title">Wearable Master Controller Assembly</h4>
+              <p class="cad-fig-desc">Official engineering blueprint (Drawn by Jay Potnis, DWG No: DFM-CT00-0) detailing the 4-link rotary encoder finger tracking assembly.</p>
+            </div>
+          </div>
+
+          <!-- Fig 3: Compliant Gripper CAD -->
+          <div class="cad-figure-card" title="Click to enlarge technical drawing">
+            <div class="cad-img-wrapper">
+              <img src="images/research/compliant-gripper-cad.png" alt="Soft Compliant Two-Claw Gripper CAD" />
+            </div>
+            <div class="cad-caption-box">
+              <div class="cad-meta-row">
+                <span class="cad-fig-num">FIG. 03</span>
+                <span class="cad-fig-type">End-Effector CAD</span>
+              </div>
+              <h4 class="cad-fig-title">Soft Compliant Tendon Gripper</h4>
+              <p class="cad-fig-desc">Multi-view engineering design of the two-jaw compliant gripper demonstrating tendon routing and compliant hinge geometry.</p>
+            </div>
+          </div>
+
+          <!-- Fig 4: Disk Column CAD -->
+          <div class="cad-figure-card" title="Click to enlarge technical drawing">
+            <div class="cad-img-wrapper">
+              <img src="images/research/disk-continuum-arm-cad.png" alt="Disk-Based Continuum Arm Column" />
+            </div>
+            <div class="cad-caption-box">
+              <div class="cad-meta-row">
+                <span class="cad-fig-num">FIG. 04</span>
+                <span class="cad-fig-type">3D CAD Model</span>
+              </div>
+              <h4 class="cad-fig-title">Multi-Link Disk Continuum Backbone</h4>
+              <p class="cad-fig-desc">Isometric rendering of the precision resin vertebrae discs threaded along the central superelastic Nitinol column.</p>
+            </div>
+          </div>
+
+          <!-- Fig 5: Electronics Test Bench -->
+          <div class="cad-figure-card" title="Click to enlarge photo">
+            <div class="cad-img-wrapper">
+              <img src="images/research/esp32-actuation-electronics.jpeg" alt="Actuation Electronics & Dual ESP32 Test Bench" />
+            </div>
+            <div class="cad-caption-box">
+              <div class="cad-meta-row">
+                <span class="cad-fig-num">FIG. 05</span>
+                <span class="cad-fig-type">Lab Test Bench</span>
+              </div>
+              <h4 class="cad-fig-title">Dual ESP32 Actuation & Driver Array</h4>
+              <p class="cad-fig-desc">Physical laboratory test bench showing dual ESP32 microcontrollers, high-current stepper motor drivers, and regulated 24V DC power rails.</p>
+            </div>
+          </div>
+
+          <!-- Fig 6: Stepper Drive Box -->
+          <div class="cad-figure-card" title="Click to enlarge photo">
+            <div class="cad-img-wrapper">
+              <img src="images/research/stepper-tendon-drive-unit.jpeg" alt="Tendon Actuation Stepper Drive Box" />
+            </div>
+            <div class="cad-caption-box">
+              <div class="cad-meta-row">
+                <span class="cad-fig-num">FIG. 06</span>
+                <span class="cad-fig-type">Actuator Unit</span>
+              </div>
+              <h4 class="cad-fig-title">Base Stepper Tendon Tensioning Assembly</h4>
+              <p class="cad-fig-desc">Base-mounted NEMA stepper drive array routing Kevlar tensioning fibres upwards into the continuum manipulator mount.</p>
+            </div>
+          </div>
+
+          <!-- Fig 7: Physical Prototype Test -->
+          <div class="cad-figure-card" title="Click to enlarge photo">
+            <div class="cad-img-wrapper">
+              <img src="images/research/continuum-arm-prototype-test.jpeg" alt="Physical Continuum Arm Flexion Test" />
+            </div>
+            <div class="cad-caption-box">
+              <div class="cad-meta-row">
+                <span class="cad-fig-num">FIG. 07</span>
+                <span class="cad-fig-type">Experimental Rig</span>
+              </div>
+              <h4 class="cad-fig-title">Physical Continuum Arm Flexion Test</h4>
+              <p class="cad-fig-desc">3D-printed disk-based continuum prototype undergoing tendon-driven curvature and flexion testing on the base stage.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- RESEARCH LOG & UPDATES (Editorial Journal) -->
+    <section id="updates" class="section section-alt">
+      <div class="container">
+        <div class="section-header-wrap">
+          <span class="eyebrow">Milestones</span>
+          <h2 class="section-title-editorial">Research Log & Progress</h2>
+          <p class="section-desc-editorial">Tracking development milestones, CAD drafting, electronic fabrication, and laboratory bench validation.</p>
+        </div>
+
+        <!-- Filter Strip -->
+        <div class="filter-nav-strip">
+          <button class="filter-btn active" data-filter="all">All Updates</button>
+          <button class="filter-btn" data-filter="hardware">Hardware & CAD</button>
+          <button class="filter-btn" data-filter="sensors">Sensors & Proprioception</button>
+          <button class="filter-btn" data-filter="software">Kinematics & Software</button>
+          <button class="filter-btn" data-filter="milestone">Milestones</button>
+        </div>
+
+        <div class="timeline-editorial">
+          <!-- Update 1 -->
+          <div class="timeline-entry" data-category="milestone hardware">
+            <div class="entry-date">November 2026</div>
+            <div class="entry-body">
+              <div class="entry-tags-row">
+                <span class="badge-tag-minimal">Milestone</span>
+                <span class="badge-tag-minimal">Hardware</span>
+              </div>
+              <h3 class="entry-title">Invention Disclosure Formalized at BITS Pilani & Subsystem Architecture Frozen</h3>
+              <p class="entry-desc">
+                Completed and filed the official Invention Disclosure Form with the Department of Electrical and Electronics 
+                Engineering at BITS Pilani. Formalized the five integrated subsystems: outer Notched Continuum Manipulator (NCM), 
+                telescoping disk arm, compliant tendon gripper, Fiber Bragg Grating (FBG) optical shape sensing, and wearable master controller.
+              </p>
+              <ul class="entry-points">
+                <li>Defined coaxial nested mechanism decoupling large-scale reach from surgical micro-dexterity.</li>
+                <li>Specified optical Fiber Bragg Grating sensing layout for 100% EMI-immune direct 3D shape reconstruction.</li>
+                <li>Established patent claims covering surgical robotics, endoscopic NOTES, and confined-space industrial inspection.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Update 2 -->
+          <div class="timeline-entry" data-category="hardware software">
+            <div class="entry-date">October 2026</div>
+            <div class="entry-body">
+              <div class="entry-tags-row">
+                <span class="badge-tag-minimal">Hardware</span>
+                <span class="badge-tag-minimal">Software</span>
+              </div>
+              <h3 class="entry-title">Hand-Worn Master Controller CAD Drafting & Teleoperation Firmware</h3>
+              <p class="entry-desc">
+                Finalized the mechanical CAD drafting sheet (DWG No: DFM-CT00-0 by Jay Potnis) for the ergonomic 
+                hand-worn master controller. Integrated precision mounts for rotary encoders tracking human finger joint angles.
+              </p>
+              <ul class="entry-points">
+                <li>Designed 4-link ergonomic finger exoskeleton mapping human hand flexion to stepper motor displacements.</li>
+                <li>Implemented low-latency ESP32 encoder reading firmware with debouncing and angular quantization.</li>
+                <li>Benchmarked teleoperation master-slave synchronization with sub-15ms response latency.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Update 3 -->
+          <div class="timeline-entry" data-category="hardware">
+            <div class="entry-date">September 2026</div>
+            <div class="entry-body">
+              <div class="entry-tags-row">
+                <span class="badge-tag-minimal">Hardware</span>
+              </div>
+              <h3 class="entry-title">Dual ESP32 Actuation Bench & High-Torque Stepper Drive Assembly</h3>
+              <p class="entry-desc">
+                Assembled the base actuation unit powered by a regulated 24V (2.67A / 64.2W) power rail. Wired dual ESP32 
+                microcontroller boards with high-current stepper motor drivers controlling antagonistic Kevlar tendon spools.
+              </p>
+              <ul class="entry-points">
+                <li>Integrated NEMA stepper motors inside a dedicated vibration-isolated base chassis.</li>
+                <li>Routed high-tensile Kevlar tendon lines through low-friction guidance channels to prevent abrasive wear.</li>
+                <li>Constructed firmware closed-loop stepper driver sequence with deterministic microstepping pulses.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Update 4 -->
+          <div class="timeline-entry" data-category="hardware sensors">
+            <div class="entry-date">August 2026</div>
+            <div class="entry-body">
+              <div class="entry-tags-row">
+                <span class="badge-tag-minimal">Hardware</span>
+                <span class="badge-tag-minimal">Sensors</span>
+              </div>
+              <h3 class="entry-title">Disk Continuum Arm Prototype 3D Printed & Flexion Bench Tested</h3>
+              <p class="entry-desc">
+                Fabricated precision resin vertebrae discs and assembled them onto a superelastic Nitinol central backbone. 
+                Mounted the continuum arm on the base test stage and verified continuous smooth bending under tendon tension.
+              </p>
+              <ul class="entry-points">
+                <li>Achieved smooth continuous bending up to 180° without inter-disk mechanical binding.</li>
+                <li>Validated spring-back elasticity of the superelastic Nitinol core returning to true straight datum.</li>
+                <li>Modelled CAD files for the soft compliant two-claw gripper to be mounted at the distal arm link.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PUBLICATIONS & CITATION -->
+    <section id="publications" class="section">
+      <div class="container">
+        <div class="section-header-wrap">
+          <span class="eyebrow">Academic Publication</span>
+          <h2 class="section-title-editorial">Research Paper & BibTeX Citation</h2>
+          <p class="section-desc-editorial">Reference this invention and repository when citing SCPA research in scientific literature.</p>
+        </div>
+
+        <div class="publication-block">
+          <div class="pub-eyebrow-row">
+            <span>PREPRINT / RESEARCH ARTICLE</span>
+            <span>2026</span>
+          </div>
+
+          <h3 class="pub-title">
+            "Soft Continuum Proprioceptive Arm (SCPA): Dual-Stage Telescoping Architecture with Distributed Optical Fiber Bragg Grating Shape Sensing"
+          </h3>
+
+          <p class="pub-authors">
+            <strong>Satvik Sharma*</strong>, <strong>Pranjal Kumar*</strong>, <strong>Anshuman Srivastava*</strong>, 
+            Jay Potnis, Tushar Sakorikar, Souvik Ghosh, S Keshav Kumar, Aditya Samdadiya, Ayushman Srivastava, Atharva Mehta, Gauransh Singh, Prakhar Agrawal
+            <span class="pub-footnote">(*Equal contribution / Project Leadership • Birla Institute of Technology & Science, Pilani)</span>
+          </p>
+
+          <div class="bibtex-shell">
+            <div class="bibtex-top">
+              <span>BIBTEX CITATION</span>
+              <button id="copy-bibtex-btn" class="btn-copy-citation" title="Copy BibTeX to clipboard">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                  <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                </svg>
+                <span id="copy-btn-text">Copy BibTeX</span>
+              </button>
+            </div>
+            <pre class="font-mono" id="bibtex-code">@article{scpa2026proprioceptive,
+  title   = {Soft Continuum Proprioceptive Arm (SCPA): Dual-Stage Telescoping Architecture with Distributed Optical Fiber Bragg Grating Shape Sensing},
+  author  = {Sharma, Satvik and Kumar, Pranjal and Srivastava, Anshuman and Potnis, Jay and Sakorikar, Tushar and Ghosh, Souvik and Kumar, S Keshav and Samdadiya, Aditya and Srivastava, Ayushman and Mehta, Atharva and Singh, Gauransh and Agrawal, Prakhar},
+  journal = {Birla Institute of Technology & Science (BITS), Pilani / arXiv preprint},
+  year    = {2026},
+  url     = {https://github.com/Team-SoftRobotics/Website}
+}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESEARCH TEAM & COLLABORATORS -->
+    <section id="team" class="section section-alt">
+      <div class="container">
+        <div class="section-header-wrap">
+          <span class="eyebrow">Investigators</span>
+          <h2 class="section-title-editorial">Project Leadership & Collaborators</h2>
+          <p class="section-desc-editorial">The engineers and researchers developing the Soft Continuum Proprioceptive Arm.</p>
+        </div>
+
+        <!-- 1. PROJECT LEADS (3 Leads, 2 Photos Sliding Window, Plain Circle) -->
+        <div class="team-tier-section">
+          <div class="tier-title-row">
+            <span class="tier-label">Project Leadership</span>
+            <div class="tier-line"></div>
+          </div>
+
+          <div class="leads-editorial-grid">
+            <!-- Lead 1: Satvik Sharma -->
+            <div class="lead-profile-card">
+              <div class="lead-slider-wrapper">
+                <div class="lead-slider-window" title="Click to enlarge photo">
+                  <div class="lead-slider-track" data-active="0">
+                    <div class="lead-slide">
+                      <img src="images/team/satvik.jpeg" alt="Satvik Sharma - Photo 1" class="member-avatar zoomable-photo" data-name="Satvik Sharma" data-role="Project Lead" onerror="if(!this.src.endsWith('satvik1.jpeg') && !this.src.endsWith('svg')){this.src='images/team/satvik1.jpeg';}else{this.onerror=null; this.src='images/team/satvik-sharma-1.svg';}" />
+                    </div>
+                    <div class="lead-slide">
+                      <img src="images/team/satvik2.jpeg" alt="Satvik Sharma - Photo 2" class="member-avatar zoomable-photo" data-name="Satvik Sharma" data-role="Project Lead" onerror="this.onerror=null; this.src='images/team/satvik-sharma-2.svg';" />
+                    </div>
+                  </div>
+                  <button class="slider-arrow prev-btn" aria-label="Previous photo" title="Previous photo">&#8249;</button>
+                  <button class="slider-arrow next-btn" aria-label="Next photo" title="Next photo">&#8250;</button>
+                  <div class="zoom-icon-hint" title="Click to enlarge">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <circle cx="11" cy="11" r="7"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      <line x1="11" y1="8" x2="11" y2="14"></line>
+                      <line x1="8" y1="11" x2="14" y2="11"></line>
+                    </svg>
+                  </div>
+                </div>
+                <div class="slider-dots">
+                  <button class="dot-btn active" data-slide="0" aria-label="View photo 1" title="Photo 1"></button>
+                  <button class="dot-btn" data-slide="1" aria-label="View photo 2" title="Photo 2"></button>
+                </div>
+              </div>
+
+              <span class="member-role-tag">Project Lead</span>
+              <h3 class="member-name">Satvik Sharma</h3>
+              
+              <div class="member-actions-row">
+                <a href="https://www.linkedin.com/in/satvik-sharma-93498537b/" target="_blank" rel="noopener noreferrer" class="member-btn" title="Satvik Sharma on LinkedIn">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                  </svg>
+                  <span>LinkedIn</span>
+                </a>
+                <a href="mailto:satvik.sharma1307@gmail.com" class="member-btn" title="Email Satvik Sharma">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                  </svg>
+                  <span>Gmail</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Lead 2: Pranjal Kumar -->
+            <div class="lead-profile-card">
+              <div class="lead-slider-wrapper">
+                <div class="lead-slider-window" title="Click to enlarge photo">
+                  <div class="lead-slider-track" data-active="0">
+                    <div class="lead-slide">
+                      <img src="images/team/pranjal.jpeg" alt="Pranjal Kumar - Photo 1" class="member-avatar zoomable-photo" data-name="Pranjal Kumar" data-role="Project Lead" onerror="if(!this.src.endsWith('pranjal1.jpeg') && !this.src.endsWith('svg')){this.src='images/team/pranjal1.jpeg';}else{this.onerror=null; this.src='images/team/pranjal-kumar-1.svg';}" />
+                    </div>
+                    <div class="lead-slide">
+                      <img src="images/team/pranjal2.jpeg" alt="Pranjal Kumar - Photo 2" class="member-avatar zoomable-photo" data-name="Pranjal Kumar" data-role="Project Lead" onerror="this.onerror=null; this.src='images/team/pranjal-kumar-2.svg';" />
+                    </div>
+                  </div>
+                  <button class="slider-arrow prev-btn" aria-label="Previous photo" title="Previous photo">&#8249;</button>
+                  <button class="slider-arrow next-btn" aria-label="Next photo" title="Next photo">&#8250;</button>
+                  <div class="zoom-icon-hint" title="Click to enlarge">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <circle cx="11" cy="11" r="7"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      <line x1="11" y1="8" x2="11" y2="14"></line>
+                      <line x1="8" y1="11" x2="14" y2="11"></line>
+                    </svg>
+                  </div>
+                </div>
+                <div class="slider-dots">
+                  <button class="dot-btn active" data-slide="0" aria-label="View photo 1" title="Photo 1"></button>
+                  <button class="dot-btn" data-slide="1" aria-label="View photo 2" title="Photo 2"></button>
+                </div>
+              </div>
+
+              <span class="member-role-tag">Project Lead</span>
+              <h3 class="member-name">Pranjal Kumar</h3>
+              
+              <div class="member-actions-row">
+                <a href="https://www.linkedin.com/in/pranjal-kumar-74859a40b/" target="_blank" rel="noopener noreferrer" class="member-btn" title="Pranjal Kumar on LinkedIn">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                  </svg>
+                  <span>LinkedIn</span>
+                </a>
+                <a href="mailto:mail.pranjal.kumar.1@gmail.com" class="member-btn" title="Email Pranjal Kumar">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                  </svg>
+                  <span>Gmail</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Lead 3: Anshuman Srivastava -->
+            <div class="lead-profile-card">
+              <div class="lead-slider-wrapper">
+                <div class="lead-slider-window" title="Click to enlarge photo">
+                  <div class="lead-slider-track" data-active="0">
+                    <div class="lead-slide">
+                      <img src="images/team/anshuman.jpeg" alt="Anshuman Srivastava - Photo 1" class="member-avatar zoomable-photo" data-name="Anshuman Srivastava" data-role="Project Lead" onerror="if(!this.src.endsWith('anshuman1.jpeg') && !this.src.endsWith('svg')){this.src='images/team/anshuman1.jpeg';}else{this.onerror=null; this.src='images/team/anshuman-srivastava-1.svg';}" />
+                    </div>
+                    <div class="lead-slide">
+                      <img src="images/team/anshuman2.jpeg" alt="Anshuman Srivastava - Photo 2" class="member-avatar zoomable-photo" data-name="Anshuman Srivastava" data-role="Project Lead" onerror="this.onerror=null; this.src='images/team/anshuman-srivastava-2.svg';" />
+                    </div>
+                  </div>
+                  <button class="slider-arrow prev-btn" aria-label="Previous photo" title="Previous photo">&#8249;</button>
+                  <button class="slider-arrow next-btn" aria-label="Next photo" title="Next photo">&#8250;</button>
+                  <div class="zoom-icon-hint" title="Click to enlarge">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <circle cx="11" cy="11" r="7"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      <line x1="11" y1="8" x2="11" y2="14"></line>
+                      <line x1="8" y1="11" x2="14" y2="11"></line>
+                    </svg>
+                  </div>
+                </div>
+                <div class="slider-dots">
+                  <button class="dot-btn active" data-slide="0" aria-label="View photo 1" title="Photo 1"></button>
+                  <button class="dot-btn" data-slide="1" aria-label="View photo 2" title="Photo 2"></button>
+                </div>
+              </div>
+
+              <span class="member-role-tag">Project Lead</span>
+              <h3 class="member-name">Anshuman Srivastava</h3>
+              
+              <div class="member-actions-row">
+                <a href="https://www.linkedin.com/in/anshuman-srivastava-264b64328/" target="_blank" rel="noopener noreferrer" class="member-btn" title="Anshuman Srivastava on LinkedIn">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                  </svg>
+                  <span>LinkedIn</span>
+                </a>
+                <a href="mailto:anshumansrivastava2006@gmail.com" class="member-btn" title="Email Anshuman Srivastava">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                  </svg>
+                  <span>Gmail</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. PROJECT COLLABORATORS (7 Collaborators, Plain Circle, Click to Enlarge) -->
+        <div class="team-tier-section">
+          <div class="tier-title-row">
+            <span class="tier-label">Project Collaborators</span>
+            <div class="tier-line"></div>
+          </div>
+
+          <div class="colabs-editorial-grid">
+            <!-- Collaborator 1: S Keshav Kumar -->
+            <div class="colab-profile-card">
+              <div class="colab-avatar-container" title="Click to enlarge photo">
+                <img src="images/team/keshav.jpeg" alt="S Keshav Kumar" class="member-avatar zoomable-photo" data-name="S Keshav Kumar" data-role="Project Collaborator" onerror="this.onerror=null; this.src='images/team/s-keshav-kumar.svg';" />
+                <div class="zoom-icon-hint" title="Click to enlarge">
+                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <line x1="11" y1="8" x2="11" y2="14"></line>
+                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                  </svg>
+                </div>
+              </div>
+              <span class="member-role-tag colab-role-tag">Collaborator</span>
+              <h4 class="colab-name">S Keshav Kumar</h4>
+              <div class="member-actions-row">
+                <a href="https://www.linkedin.com/in/s-keshav-kumar-2b25b8212/" target="_blank" rel="noopener noreferrer" class="member-btn" title="S Keshav Kumar on LinkedIn">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                  </svg>
+                  <span>LinkedIn</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Collaborator 2: Aditya Samdadiya -->
+            <div class="colab-profile-card">
+              <div class="colab-avatar-container" title="Click to enlarge photo">
+                <img src="images/team/aditya.jpeg" alt="Aditya Samdadiya" class="member-avatar zoomable-photo" data-name="Aditya Samdadiya" data-role="Project Collaborator" onerror="this.onerror=null; this.src='images/team/aditya-samdadiya.svg';" />
+                <div class="zoom-icon-hint" title="Click to enlarge">
+                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <line x1="11" y1="8" x2="11" y2="14"></line>
+                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                  </svg>
+                </div>
+              </div>
+              <span class="member-role-tag colab-role-tag">Collaborator</span>
+              <h4 class="colab-name">Aditya Samdadiya</h4>
+              <div class="member-actions-row">
+                <a href="https://www.linkedin.com/in/aditya-samdadiya" target="_blank" rel="noopener noreferrer" class="member-btn" title="Aditya Samdadiya on LinkedIn">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                  </svg>
+                  <span>LinkedIn</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Collaborator 3: Ayushman Srivastava -->
+            <div class="colab-profile-card">
+              <div class="colab-avatar-container" title="Click to enlarge photo">
+                <img src="images/team/ayushman.jpeg" alt="Ayushman Srivastava" class="member-avatar zoomable-photo" data-name="Ayushman Srivastava" data-role="Project Collaborator" onerror="this.onerror=null; this.src='images/team/ayushman-srivastava.svg';" />
+                <div class="zoom-icon-hint" title="Click to enlarge">
+                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <line x1="11" y1="8" x2="11" y2="14"></line>
+                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                  </svg>
+                </div>
+              </div>
+              <span class="member-role-tag colab-role-tag">Collaborator</span>
+              <h4 class="colab-name">Ayushman Srivastava</h4>
+              <div class="member-actions-row">
+                <a href="https://www.linkedin.com/in/ayushman-srivastava-47466b31a/" target="_blank" rel="noopener noreferrer" class="member-btn" title="Ayushman Srivastava on LinkedIn">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                  </svg>
+                  <span>LinkedIn</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Collaborator 4: Jay Potnis -->
+            <div class="colab-profile-card">
+              <div class="colab-avatar-container" title="Click to enlarge photo">
+                <img src="images/team/jay.jpeg" alt="Jay Potnis" class="member-avatar zoomable-photo" data-name="Jay Potnis" data-role="Project Collaborator" onerror="this.onerror=null; this.src='images/team/jay-potnis.svg';" />
+                <div class="zoom-icon-hint" title="Click to enlarge">
+                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <line x1="11" y1="8" x2="11" y2="14"></line>
+                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                  </svg>
+                </div>
+              </div>
+              <span class="member-role-tag colab-role-tag">Collaborator</span>
+              <h4 class="colab-name">Jay Potnis</h4>
+              <div class="member-actions-row">
+                <a href="https://www.linkedin.com/in/jay-potnis/" target="_blank" rel="noopener noreferrer" class="member-btn" title="Jay Potnis on LinkedIn">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                  </svg>
+                  <span>LinkedIn</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Collaborator 5: Atharva Mehta -->
+            <div class="colab-profile-card">
+              <div class="colab-avatar-container" title="Click to enlarge photo">
+                <img src="images/team/atharva.jpeg" alt="Atharva Mehta" class="member-avatar zoomable-photo" data-name="Atharva Mehta" data-role="Project Collaborator" onerror="this.onerror=null; this.src='images/team/atharva-mehta.svg';" />
+                <div class="zoom-icon-hint" title="Click to enlarge">
+                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <line x1="11" y1="8" x2="11" y2="14"></line>
+                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                  </svg>
+                </div>
+              </div>
+              <span class="member-role-tag colab-role-tag">Collaborator</span>
+              <h4 class="colab-name">Atharva Mehta</h4>
+              <div class="member-actions-row">
+                <a href="https://www.linkedin.com/in/atharv-mehta-1529a7284/" target="_blank" rel="noopener noreferrer" class="member-btn" title="Atharva Mehta on LinkedIn">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                  </svg>
+                  <span>LinkedIn</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Collaborator 6: Gauransh Singh -->
+            <div class="colab-profile-card">
+              <div class="colab-avatar-container" title="Click to enlarge photo">
+                <img src="images/team/gauransh.jpeg" alt="Gauransh Singh" class="member-avatar zoomable-photo" data-name="Gauransh Singh" data-role="Project Collaborator" onerror="this.onerror=null; this.src='images/team/gauransh-singh.svg';" />
+                <div class="zoom-icon-hint" title="Click to enlarge">
+                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <line x1="11" y1="8" x2="11" y2="14"></line>
+                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                  </svg>
+                </div>
+              </div>
+              <span class="member-role-tag colab-role-tag">Collaborator</span>
+              <h4 class="colab-name">Gauransh Singh</h4>
+              <div class="member-actions-row">
+                <a href="https://www.linkedin.com/in/gauransh-singh" target="_blank" rel="noopener noreferrer" class="member-btn" title="Gauransh Singh on LinkedIn">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                  </svg>
+                  <span>LinkedIn</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Collaborator 7: Prakhar Agrawal -->
+            <div class="colab-profile-card">
+              <div class="colab-avatar-container" title="Click to enlarge photo">
+                <img src="images/team/prakhar.jpeg" alt="Prakhar Agrawal" class="member-avatar zoomable-photo" data-name="Prakhar Agrawal" data-role="Project Collaborator" onerror="this.onerror=null; this.src='images/team/prakhar-agrawal.svg';" />
+                <div class="zoom-icon-hint" title="Click to enlarge">
+                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <line x1="11" y1="8" x2="11" y2="14"></line>
+                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                  </svg>
+                </div>
+              </div>
+              <span class="member-role-tag colab-role-tag">Collaborator</span>
+              <h4 class="colab-name">Prakhar Agrawal</h4>
+              <div class="member-actions-row">
+                <a href="https://www.linkedin.com/in/prakhar-agrawal-2a5227286/" target="_blank" rel="noopener noreferrer" class="member-btn" title="Prakhar Agrawal on LinkedIn">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                  </svg>
+                  <span>LinkedIn</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Co-Inventor / Collaborator: Tushar Sakorikar -->
+            <div class="colab-profile-card">
+              <div class="colab-avatar-container" title="Click to enlarge photo">
+                <img src="images/team/tushar.jpeg" alt="Tushar Sakorikar" class="member-avatar zoomable-photo" data-name="Tushar Sakorikar" data-role="Co-Inventor / Research" onerror="this.onerror=null; this.src='images/team/tushar.svg';" />
+                <div class="zoom-icon-hint" title="Click to enlarge">
+                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <line x1="11" y1="8" x2="11" y2="14"></line>
+                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                  </svg>
+                </div>
+              </div>
+              <span class="member-role-tag colab-role-tag">Co-Inventor</span>
+              <h4 class="colab-name">Tushar Sakorikar</h4>
+              <div class="member-actions-row">
+                <span class="member-btn" title="BITS Pilani">
+                  <span>BITS Pilani</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Co-Inventor / Collaborator: Souvik Ghosh -->
+            <div class="colab-profile-card">
+              <div class="colab-avatar-container" title="Click to enlarge photo">
+                <img src="images/team/souvik.jpeg" alt="Souvik Ghosh" class="member-avatar zoomable-photo" data-name="Souvik Ghosh" data-role="Co-Inventor / Research" onerror="this.onerror=null; this.src='images/team/souvik.svg';" />
+                <div class="zoom-icon-hint" title="Click to enlarge">
+                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <line x1="11" y1="8" x2="11" y2="14"></line>
+                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                  </svg>
+                </div>
+              </div>
+              <span class="member-role-tag colab-role-tag">Co-Inventor</span>
+              <h4 class="colab-name">Souvik Ghosh</h4>
+              <div class="member-actions-row">
+                <span class="member-btn" title="BITS Pilani">
+                  <span>BITS Pilani</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CONNECT & RESOURCES SECTION -->
+    <section id="connect" class="section">
+      <div class="container">
+        <div class="section-header-wrap">
+          <span class="eyebrow">Collaboration</span>
+          <h2 class="section-title-editorial">Links, Data & Communication</h2>
+          <p class="section-desc-editorial">Access open-source code packages, CAD drawings, publications, and contact lines.</p>
+        </div>
+
+        <div class="connect-grid-editorial">
+          <!-- GitHub Card -->
+          <a href="https://github.com/Team-SoftRobotics/Website" target="_blank" rel="noopener noreferrer" class="connect-tile">
+            <div class="connect-icon-box">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+              </svg>
+            </div>
+            <h3>GitHub Repository</h3>
+            <p>ROS2 kinematics drivers, CAD STL files, firmware, and evaluation datasets.</p>
+            <span class="connect-action-link">github.com/Team-SoftRobotics/Website →</span>
+          </a>
+
+          <!-- Team LinkedIn Card -->
+          <a href="#team" class="connect-tile">
+            <div class="connect-icon-box">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+              </svg>
+            </div>
+            <h3>Team Profiles</h3>
+            <p>Connect with the individual leads and collaborators on their LinkedIn profiles.</p>
+            <span class="connect-action-link">View Researcher Profiles →</span>
+          </a>
+
+          <!-- CAD / Docs Card -->
+          <a href="https://github.com/Team-SoftRobotics/Website" target="_blank" rel="noopener noreferrer" class="connect-tile">
+            <div class="connect-icon-box">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+              </svg>
+            </div>
+            <h3>CAD & Mechanical Data</h3>
+            <p>Download STEP / SolidWorks models for vertebrae discs and mold casting negatives.</p>
+            <span class="connect-action-link">Browse CAD Files →</span>
+          </a>
+
+          <!-- Direct Email Card -->
+          <a href="mailto:mail.pranjal.kumar.1@gmail.com" class="connect-tile">
+            <div class="connect-icon-box">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+              </svg>
+            </div>
+            <h3>Direct Contact</h3>
+            <p>Direct academic inquiries for research visits, paper review, or questions.</p>
+            <span class="connect-action-link">mail.pranjal.kumar.1@gmail.com →</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer (Deep Navy) -->
+  <footer class="footer-dark">
+    <div class="container footer-editorial-layout">
+      <div class="footer-left">
+        <h4>Soft Continuum Proprioceptive Arm (SCPA)</h4>
+        <p>© <span id="current-year"></span> SCPA Research Team • BITS Pilani.</p>
+      </div>
+      <div class="footer-nav-list">
+        <a href="#about">Overview</a>
+        <a href="#simulator">Simulator</a>
+        <a href="#architecture">Subsystems</a>
+        <a href="#hardware">CAD & Hardware</a>
+        <a href="#updates">Research Log</a>
+        <a href="#team">Team</a>
+        <a href="#publications">BibTeX</a>
+        <a href="https://github.com/Team-SoftRobotics/Website" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Lightbox Modal for Enlarged Photo View -->
+  <div id="photo-modal" class="photo-modal" aria-hidden="true" role="dialog" aria-label="Enlarged photo preview">
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+    <div class="modal-dialog">
+      <button class="modal-close-btn" id="modal-close" aria-label="Close enlarged photo" title="Close (Esc)">&times;</button>
+      <div class="modal-circle-frame">
+        <img id="modal-img" src="" alt="Enlarged portrait" class="modal-portrait" />
+      </div>
+      <div class="modal-info">
+        <h3 id="modal-name">Researcher Name</h3>
+        <span id="modal-role" class="modal-role-pill">Project Lead</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
