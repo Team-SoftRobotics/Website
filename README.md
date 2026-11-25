@@ -13,7 +13,7 @@ Official research landing page, dynamic digital twin visualizer, and progress lo
 - **Real-Time Telemetry HUD**: Live computation of tip coordinate $(X, Y)$, mean curvature $\kappa$, and differential strain $\Delta\epsilon$.
 - **Interactive Parameter Studio**: Sliders allowing visitors or reviewers to directly test segment curvatures $\kappa_1, \kappa_2, \kappa_3$ and observe the proprioceptive state reconstruction.
 - **Filterable Research Journal**: Easily categorize project updates (`Hardware & CAD`, `Sensors & Proprioception`, `Kinematics & Software`, `Milestones`).
-- **Academic BibTeX Card**: Includes 1-click citation copy button.
+- **Academic Publication Reference**: Clean reference for research citations.
 - **Team Lightbox & Sliding Window**:
   - Leads feature an interactive 2-photo sliding window (`firstname.jpeg` & `firstname2.jpeg`) with navigation dots and arrows.
   - Plain circular boundaries with subtle hover elevation.

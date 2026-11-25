@@ -43,7 +43,7 @@
         <a href="#hardware">CAD & Hardware</a>
         <a href="#updates">Research Log</a>
         <a href="#team">Team</a>
-        <a href="#publications">BibTeX</a>
+        <a href="#publications">Publications</a>
         <a href="#connect">Connect</a>
       </nav>
 
@@ -251,74 +251,254 @@
       </div>
     </section>
 
-    <!-- DEEP NAVY SECTION: KINEMATICS & BENDING PARAMETER STUDIO -->
+    <!-- DEEP NAVY SECTION: DOC-OC KINEMATICS STUDIO & MUJOCO DIGITAL TWIN -->
     <section id="simulator" class="section section-dark">
       <div class="container">
         <div class="section-header-wrap">
-          <span class="eyebrow eyebrow-dark">Laboratory Simulation</span>
-          <h2 class="section-title-editorial">Kinematics & Parameter Studio</h2>
+          <div class="studio-header-pill-row">
+            <span class="eyebrow eyebrow-dark">MuJoCo Continuum Simulation</span>
+            <a href="https://github.com/Team-SoftRobotics/Simulations" target="_blank" rel="noopener noreferrer" class="studio-repo-badge">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+              </svg>
+              <span>Codebase: Team-SoftRobotics/Simulations</span>
+            </a>
+          </div>
+          <h2 class="section-title-editorial">Kinematics Studio: DOC-Oc MuJoCo Engine</h2>
           <p class="section-desc-editorial" style="color: var(--soft-gray);">
-            Manually calibrate segment curvatures and observe the real-time differential strain response.
+            Interactive continuum arm digital twin driven by exact 4-tendon antagonistic kinematics, 11-disc spatial deformation, 
+            7-wire Nitinol core strain tracking, and least-squares Piecewise Constant Curvature (PCC) state estimation.
           </p>
         </div>
 
-        <div class="studio-grid">
-          <div class="controls-col">
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="seg1-slider">Proximal Segment Curvature (κ₁)</label>
-                <span id="seg1-val" class="slider-val-readout">0.00 rad</span>
+        <div class="studio-main-grid">
+          <!-- Left Column: 3D Visualization Viewport & WASD Control Pad -->
+          <div class="studio-viewport-col">
+            <div class="studio-canvas-shell">
+              <div class="studio-canvas-topbar">
+                <div class="canvas-status-tag">
+                  <span class="studio-live-dot"></span>
+                  <span class="font-mono text-xs">DOC-OC MODEL • 11 DISCS (L=96mm)</span>
+                </div>
+                <div class="canvas-view-controls">
+                  <button id="view-iso" class="view-btn active" title="Isometric 3D View">Isometric</button>
+                  <button id="view-front" class="view-btn" title="Front XZ View">Front</button>
+                  <button id="view-side" class="view-btn" title="Side YZ View">Side</button>
+                  <button id="view-top" class="view-btn" title="Top-Down XY View">Top</button>
+                </div>
               </div>
-              <input type="range" id="seg1-slider" min="-1.2" max="1.2" step="0.01" value="0.0" />
+
+              <div class="studio-canvas-wrap">
+                <canvas id="studio-arm-canvas"></canvas>
+                <div class="studio-canvas-legend">
+                  <span class="legend-item"><span class="legend-dot dot-px"></span>+X Tendon (px)</span>
+                  <span class="legend-item"><span class="legend-dot dot-nx"></span>-X Tendon (nx)</span>
+                  <span class="legend-item"><span class="legend-dot dot-py"></span>+Y Tendon (py)</span>
+                  <span class="legend-item"><span class="legend-dot dot-ny"></span>-Y Tendon (ny)</span>
+                  <span class="legend-item"><span class="legend-dot dot-nitinol"></span>7-Nitinol Core</span>
+                </div>
+              </div>
             </div>
 
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="seg2-slider">Medial Segment Curvature (κ₂)</label>
-                <span id="seg2-val" class="slider-val-readout">0.00 rad</span>
+            <!-- On-Screen WASD Controller Cluster -->
+            <div class="wasd-controller-card">
+              <div class="wasd-card-header">
+                <span class="wasd-title">TACTILE ACTUATION CONTROLLER</span>
+                <span id="actuation-mode-badge" class="wasd-badge">HOLD: CONTINUOUS • TAP: STEP</span>
               </div>
-              <input type="range" id="seg2-slider" min="-1.5" max="1.5" step="0.01" value="0.0" />
-            </div>
 
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="seg3-slider">Distal Segment Curvature (κ₃)</label>
-                <span id="seg3-val" class="slider-val-readout">0.00 rad</span>
+              <div class="wasd-layout">
+                <!-- WASD D-Pad Buttons -->
+                <div class="wasd-pad">
+                  <div class="wasd-row wasd-row-top">
+                    <button id="key-w" class="wasd-btn wasd-btn-w" data-key="w" aria-label="Actuate W +Y Bending">
+                      <span class="wasd-char">W</span>
+                      <span class="wasd-dir">+Y BEND</span>
+                    </button>
+                  </div>
+                  <div class="wasd-row wasd-row-mid">
+                    <button id="key-a" class="wasd-btn wasd-btn-a" data-key="a" aria-label="Actuate A -X Bending">
+                      <span class="wasd-char">A</span>
+                      <span class="wasd-dir">-X BEND</span>
+                    </button>
+                    <button id="key-reset" class="wasd-btn wasd-btn-reset" aria-label="Reset arm to neutral vertical">
+                      <span class="wasd-char">⟲</span>
+                      <span class="wasd-dir">RESET</span>
+                    </button>
+                    <button id="key-d" class="wasd-btn wasd-btn-d" data-key="d" aria-label="Actuate D +X Bending">
+                      <span class="wasd-char">D</span>
+                      <span class="wasd-dir">+X BEND</span>
+                    </button>
+                  </div>
+                  <div class="wasd-row wasd-row-bottom">
+                    <button id="key-s" class="wasd-btn wasd-btn-s" data-key="s" aria-label="Actuate S -Y Bending">
+                      <span class="wasd-char">S</span>
+                      <span class="wasd-dir">-Y BEND</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Auxiliary Controls & Keyboard Instructions -->
+                <div class="wasd-meta-panel">
+                  <div class="wasd-meta-line">
+                    <span class="meta-label">Motor Step Angle:</span>
+                    <span class="meta-value font-mono">0.18° (16× Microstep = 0.251 mm)</span>
+                  </div>
+                  <div class="wasd-meta-line">
+                    <span class="meta-label">Repeat Rate:</span>
+                    <span class="meta-value font-mono">33.3 Hz (30 ms repeat period)</span>
+                  </div>
+                  <div class="wasd-meta-line">
+                    <span class="meta-label">Physical Keyboard:</span>
+                    <span class="meta-value font-mono">[W] [A] [S] [D] • [R] / [Esc] Reset</span>
+                  </div>
+                  <div class="wasd-meta-line">
+                    <span class="meta-label">Active Key Press:</span>
+                    <span id="active-keys-tag" class="meta-key-tag font-mono">NONE</span>
+                  </div>
+                </div>
               </div>
-              <input type="range" id="seg3-slider" min="-1.8" max="1.8" step="0.01" value="0.0" />
-            </div>
-
-            <div class="preset-actions-row">
-              <button id="btn-reset-sliders" class="btn-ghost-dark">Reset Neutral</button>
-              <button id="btn-preset-s-curve" class="btn-ghost-dark">S-Curve Preset</button>
-              <button id="btn-preset-spiral" class="btn-ghost-dark">Coil Preset</button>
             </div>
           </div>
 
-          <div class="data-reconstruction-col">
-            <h4>Reconstructed Proprioceptive State</h4>
-            <div class="readout-list font-mono">
-              <div class="readout-line">
-                <span class="readout-key">Dorsal Channel Strain:</span>
-                <span id="strain-dorsal" class="readout-val">0.00 %</span>
+          <!-- Right Column: MuJoCo Accurate Detection & Telemetry Terminal -->
+          <div class="studio-telemetry-col">
+            <!-- 1. System Health & Safety Latch -->
+            <div class="telemetry-card">
+              <div class="tel-card-header">
+                <span class="tel-card-title">SYSTEM STATUS & ACTUATION STATE</span>
+                <span id="safety-status-badge" class="badge-status-nominal">NOMINAL [OK]</span>
               </div>
-              <div class="readout-line">
-                <span class="readout-key">Ventral Channel Strain:</span>
-                <span id="strain-ventral" class="readout-val">0.00 %</span>
-              </div>
-              <div class="readout-line">
-                <span class="readout-key">Tip Workspace Angle:</span>
-                <span id="tip-angle" class="readout-val">0.0°</span>
-              </div>
-              <div class="readout-line">
-                <span class="readout-key">State Confidence:</span>
-                <span class="readout-val" style="color: var(--soft-gray);">99.4% (Nominal)</span>
+              <div class="tel-stats-grid">
+                <div class="tel-stat-box">
+                  <span class="stat-name">Last Command</span>
+                  <span id="stat-last-cmd" class="stat-num font-mono">NONE</span>
+                </div>
+                <div class="tel-stat-box">
+                  <span class="stat-name">Total Steps</span>
+                  <span id="stat-total-steps" class="stat-num font-mono">0</span>
+                </div>
+                <div class="tel-stat-box">
+                  <span class="stat-name">X Command Steps</span>
+                  <span id="stat-x-steps" class="stat-num font-mono">+0 <small>/ ±450</small></span>
+                </div>
+                <div class="tel-stat-box">
+                  <span class="stat-name">Y Command Steps</span>
+                  <span id="stat-y-steps" class="stat-num font-mono">+0 <small>/ ±450</small></span>
+                </div>
               </div>
             </div>
-            <p class="studio-footnote">
-              *Differential strain ratios between opposing dorsal and ventral sensor lines establish 
-              curvature determination without expensive numeric iterative solvers.
-            </p>
+
+            <!-- 2. End-Effector Tip Coordinates -->
+            <div class="telemetry-card">
+              <div class="tel-card-header">
+                <span class="tel-card-title">END-EFFECTOR TIP POSE [ACCURATE DETECTION]</span>
+                <span class="tel-card-sub font-mono">Origin [0, 0, 0] mm</span>
+              </div>
+              <div class="tel-stats-grid">
+                <div class="tel-stat-box">
+                  <span class="stat-name">Tip X Position</span>
+                  <span id="stat-tip-x" class="stat-num font-mono">0.000 mm</span>
+                </div>
+                <div class="tel-stat-box">
+                  <span class="stat-name">Tip Y Position</span>
+                  <span id="stat-tip-y" class="stat-num font-mono">0.000 mm</span>
+                </div>
+                <div class="tel-stat-box">
+                  <span class="stat-name">Tip Z Position</span>
+                  <span id="stat-tip-z" class="stat-num font-mono">96.000 mm</span>
+                </div>
+                <div class="tel-stat-box">
+                  <span class="stat-name">Tip XY Radial Deflection</span>
+                  <span id="stat-tip-xy" class="stat-num font-mono">0.000 mm</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. PCC Kinematic Estimation (Least-Squares Solution) -->
+            <div class="telemetry-card">
+              <div class="tel-card-header">
+                <span class="tel-card-title">PCC KINEMATICS [LEAST-SQUARES JACOBIAN]</span>
+                <span class="tel-card-sub font-mono">4-Tendon Least-Squares</span>
+              </div>
+              <div class="tel-stats-grid">
+                <div class="tel-stat-box">
+                  <span class="stat-name">Total Curvature (κ)</span>
+                  <span id="stat-curv-total" class="stat-num font-mono">0.0000 1/m</span>
+                </div>
+                <div class="tel-stat-box">
+                  <span class="stat-name">Bending Angle (θ)</span>
+                  <span id="stat-bend-angle" class="stat-num font-mono">0.000 deg</span>
+                </div>
+                <div class="tel-stat-box">
+                  <span class="stat-name">Curvature X (κx)</span>
+                  <span id="stat-curv-x" class="stat-num font-mono">0.0000 1/m</span>
+                </div>
+                <div class="tel-stat-box">
+                  <span class="stat-name">Curvature Y (κy)</span>
+                  <span id="stat-curv-y" class="stat-num font-mono">0.0000 1/m</span>
+                </div>
+                <div class="tel-stat-box">
+                  <span class="stat-name">Bending Direction (φ)</span>
+                  <span id="stat-bend-dir" class="stat-num font-mono">0.000 deg</span>
+                </div>
+                <div class="tel-stat-box">
+                  <span class="stat-name">Common Axial Strain</span>
+                  <span id="stat-axial-strain" class="stat-num font-mono">0.0000 %</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Nitinol Core Tensile Strain (7 Central Wires) -->
+            <div class="telemetry-card">
+              <div class="tel-card-header">
+                <span class="tel-card-title">7-WIRE NITINOL CORE STRAIN</span>
+                <span class="tel-card-sub font-mono">Warn: 7.0% • Limit: 8.0%</span>
+              </div>
+              <div class="nitinol-wire-grid font-mono">
+                <div class="wire-item"><span class="wire-label">W1 (Core):</span> <span id="wire-1" class="wire-val">0.000%</span></div>
+                <div class="wire-item"><span class="wire-label">W2 (+X):</span> <span id="wire-2" class="wire-val">0.000%</span></div>
+                <div class="wire-item"><span class="wire-label">W3 (+X,+Y):</span> <span id="wire-3" class="wire-val">0.000%</span></div>
+                <div class="wire-item"><span class="wire-label">W4 (-X,+Y):</span> <span id="wire-4" class="wire-val">0.000%</span></div>
+                <div class="wire-item"><span class="wire-label">W5 (-X):</span> <span id="wire-5" class="wire-val">0.000%</span></div>
+                <div class="wire-item"><span class="wire-label">W6 (-X,-Y):</span> <span id="wire-6" class="wire-val">0.000%</span></div>
+                <div class="wire-item"><span class="wire-label">W7 (+X,-Y):</span> <span id="wire-7" class="wire-val">0.000%</span></div>
+                <div class="wire-item wire-item-max"><span class="wire-label">MAX TENSILE:</span> <span id="wire-max" class="wire-val text-accent">0.000%</span></div>
+              </div>
+              <div class="strain-progress-track">
+                <div id="strain-progress-bar" class="strain-progress-fill" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <!-- 5. 4-Tendon Lengths & Deltas -->
+            <div class="telemetry-card">
+              <div class="tel-card-header">
+                <span class="tel-card-title">4-TENDON ANTAGONISTIC DRIVE LENGTHS</span>
+                <span class="tel-card-sub font-mono">L₀ = 96.000 mm</span>
+              </div>
+              <div class="tendon-summary-grid font-mono">
+                <div class="ten-item">
+                  <span class="ten-name">Tendon px (+X)</span>
+                  <span id="ten-px-val" class="ten-val">96.000 mm</span>
+                  <span id="ten-px-delta" class="ten-delta">Δ: 0.000 mm</span>
+                </div>
+                <div class="ten-item">
+                  <span class="ten-name">Tendon nx (-X)</span>
+                  <span id="ten-nx-val" class="ten-val">96.000 mm</span>
+                  <span id="ten-nx-delta" class="ten-delta">Δ: 0.000 mm</span>
+                </div>
+                <div class="ten-item">
+                  <span class="ten-name">Tendon py (+Y)</span>
+                  <span id="ten-py-val" class="ten-val">96.000 mm</span>
+                  <span id="ten-py-delta" class="ten-delta">Δ: 0.000 mm</span>
+                </div>
+                <div class="ten-item">
+                  <span class="ten-name">Tendon ny (-Y)</span>
+                  <span id="ten-ny-val" class="ten-val">96.000 mm</span>
+                  <span id="ten-ny-delta" class="ten-delta">Δ: 0.000 mm</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -686,7 +866,7 @@
       <div class="container">
         <div class="section-header-wrap">
           <span class="eyebrow">Academic Publication</span>
-          <h2 class="section-title-editorial">Research Paper & BibTeX Citation</h2>
+          <h2 class="section-title-editorial">Research Publication</h2>
           <p class="section-desc-editorial">Reference this invention and repository when citing SCPA research in scientific literature.</p>
         </div>
 
@@ -705,25 +885,6 @@
             Jay Potnis, Tushar Sakorikar, Souvik Ghosh, S Keshav Kumar, Aditya Samdadiya, Ayushman Srivastava, Atharva Mehta, Gauransh Singh, Prakhar Agrawal
             <span class="pub-footnote">(*Equal contribution / Project Leadership • Birla Institute of Technology & Science, Pilani)</span>
           </p>
-
-          <div class="bibtex-shell">
-            <div class="bibtex-top">
-              <span>BIBTEX CITATION</span>
-              <button id="copy-bibtex-btn" class="btn-copy-citation" title="Copy BibTeX to clipboard">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
-                  <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-                </svg>
-                <span id="copy-btn-text">Copy BibTeX</span>
-              </button>
-            </div>
-            <pre class="font-mono" id="bibtex-code">@article{scpa2026proprioceptive,
-  title   = {Soft Continuum Proprioceptive Arm (SCPA): Dual-Stage Telescoping Architecture with Distributed Optical Fiber Bragg Grating Shape Sensing},
-  author  = {Sharma, Satvik and Kumar, Pranjal and Srivastava, Anshuman and Potnis, Jay and Sakorikar, Tushar and Ghosh, Souvik and Kumar, S Keshav and Samdadiya, Aditya and Srivastava, Ayushman and Mehta, Atharva and Singh, Gauransh and Agrawal, Prakhar},
-  journal = {Birla Institute of Technology & Science (BITS), Pilani / arXiv preprint},
-  year    = {2026},
-  url     = {https://github.com/Team-SoftRobotics}
-}</pre>
-          </div>
         </div>
       </div>
     </section>
@@ -1199,7 +1360,7 @@
         <a href="#hardware">CAD & Hardware</a>
         <a href="#updates">Research Log</a>
         <a href="#team">Team</a>
-        <a href="#publications">BibTeX</a>
+        <a href="#publications">Publications</a>
         <a href="https://github.com/Team-SoftRobotics" target="_blank" rel="noopener noreferrer">GitHub</a>
       </div>
     </div>
