@@ -40,378 +40,8 @@ if (themeToggleBtn) {
   });
 }
 
-// -------------------------------------------------------------------
-// 2. Interactive Soft Continuum Arm Simulation (Canvas)
-// -------------------------------------------------------------------
-const canvas = document.getElementById('continuum-canvas');
-const ctx = canvas ? canvas.getContext('2d') : null;
-
-// HUD Telemetry Elements
-const telPos = document.getElementById('tel-pos');
-const telCurvature = document.getElementById('tel-curvature');
-const telStrain = document.getElementById('tel-strain');
-const toggleModeBtn = document.getElementById('toggle-sim-mode');
-const simModeText = document.getElementById('sim-mode-text');
-
-let simMode = 'interactive'; // 'interactive' or 'auto'
-let mouseTarget = { x: 0, y: 0, active: false };
-
-// Kinematic State (Curvatures for 3 segments)
-let k1 = 0, k2 = 0, k3 = 0;
-let targetK1 = 0, targetK2 = 0, targetK3 = 0;
-const SEGMENT_LENGTH = 75; // px per segment
-const NUM_VERTEBRAE = 24;  // discretization steps for smooth rendering
-const ARM_RADIUS = 16;      // radius/thickness of soft silicone body
-
-// End effector trail
-const trail = [];
-const MAX_TRAIL = 35;
-
-function resizeCanvas() {
-  if (!canvas || !ctx) return;
-  const rect = canvas.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = rect.width * dpr;
-  canvas.height = rect.height * dpr;
-  ctx.scale(dpr, dpr);
-}
-
-if (canvas) {
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
-
-  // Mouse tracking on Canvas
-  canvas.addEventListener('mousemove', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    mouseTarget.x = e.clientX - rect.left;
-    mouseTarget.y = e.clientY - rect.top;
-    mouseTarget.active = true;
-  });
-
-  canvas.addEventListener('mouseleave', () => {
-    mouseTarget.active = false;
-  });
-}
-
-if (toggleModeBtn && simModeText) {
-  toggleModeBtn.addEventListener('click', () => {
-    simMode = simMode === 'interactive' ? 'auto' : 'interactive';
-    simModeText.textContent = simMode === 'interactive' ? 'Mode: Interactive' : 'Mode: Auto-Sweep';
-    toggleModeBtn.style.color = simMode === 'interactive' ? '#5289AD' : '#ACBCBF';
-  });
-}
-
-// Compute Soft Arm Backbone points using Piecewise Constant Curvature (PCC)
-function computeBackbone(curvatures, basePos) {
-  const points = [];
-  const orientations = [];
-  
-  let currentPos = { x: basePos.x, y: basePos.y };
-  let currentAngle = -Math.PI / 2; // Pointing upwards initially
-
-  points.push({ ...currentPos });
-  orientations.push(currentAngle);
-
-  const totalSegments = curvatures.length;
-  const subStepsPerSegment = NUM_VERTEBRAE / totalSegments;
-
-  for (let s = 0; s < totalSegments; s++) {
-    const kappa = curvatures[s];
-    const ds = SEGMENT_LENGTH / subStepsPerSegment;
-
-    for (let i = 0; i < subStepsPerSegment; i++) {
-      if (Math.abs(kappa) < 0.0001) {
-        // Straight segment
-        currentPos.x += ds * Math.cos(currentAngle);
-        currentPos.y += ds * Math.sin(currentAngle);
-      } else {
-        // Arc segment
-        const dTheta = kappa * ds;
-        currentPos.x += (Math.sin(currentAngle + dTheta) - Math.sin(currentAngle)) / kappa;
-        currentPos.y += (-Math.cos(currentAngle + dTheta) + Math.cos(currentAngle)) / kappa;
-        currentAngle += dTheta;
-      }
-      points.push({ ...currentPos });
-      orientations.push(currentAngle);
-    }
-  }
-
-  return { points, orientations };
-}
-
-// Main Animation Loop
-let animTime = 0;
-
-function renderSimulation() {
-  if (!canvas || !ctx) return;
-  animTime += 0.025;
-  const rect = canvas.getBoundingClientRect();
-  const width = rect.width;
-  const height = rect.height;
-  const basePos = { x: width * 0.5, y: height * 0.88 };
-
-  // Control Logic based on mode
-  if (simMode === 'auto') {
-    targetK1 = Math.sin(animTime * 0.8) * 0.012;
-    targetK2 = Math.cos(animTime * 1.1) * 0.015;
-    targetK3 = Math.sin(animTime * 1.4 + 1.0) * 0.018;
-  } else if (mouseTarget.active) {
-    // Map mouse position relative to base to segment curvatures
-    const dx = (mouseTarget.x - basePos.x) / (width * 0.5);
-    const dy = (basePos.y - mouseTarget.y) / (height * 0.8);
-    
-    // Smooth inverse target mapping
-    targetK1 = dx * 0.014;
-    targetK2 = (dx * 1.1 + Math.sin(dy * 2.5) * 0.2) * 0.015;
-    targetK3 = (dx * 1.4 - 0.2) * 0.018;
-  }
-
-  // Smooth low-pass filter (spring damper) to simulate soft viscoelastic response
-  k1 += (targetK1 - k1) * 0.08;
-  k2 += (targetK2 - k2) * 0.08;
-  k3 += (targetK3 - k3) * 0.08;
-
-  // Clear canvas
-  ctx.clearRect(0, 0, width, height);
-
-  // Draw Subtle Tech Grid & Base Platform
-  drawGridAndBase(width, height, basePos);
-
-  // Compute backbone curve
-  const { points, orientations } = computeBackbone([k1, k2, k3], basePos);
-
-  // Record tip trail
-  const tip = points[points.length - 1];
-  trail.push({ x: tip.x, y: tip.y });
-  if (trail.length > MAX_TRAIL) trail.shift();
-
-  // Draw Tip Trail
-  drawTrail();
-
-  // Draw Soft Body & Proprioceptive Sensor Fibers
-  drawSoftArmBody(points, orientations);
-
-  // Draw Tip End-Effector / Coordinate Frame
-  drawEndEffector(tip, orientations[orientations.length - 1]);
-
-  // Update HUD Telemetry text
-  updateHUDTelemetry(tip, basePos);
-
-  requestAnimationFrame(renderSimulation);
-}
-
-function drawGridAndBase(width, height, basePos) {
-  ctx.save();
-  // Engineering grid lines - soft gray hairline
-  ctx.strokeStyle = 'rgba(172, 188, 191, 0.08)';
-  ctx.lineWidth = 1;
-  const step = 32;
-  for (let x = 0; x < width; x += step) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, height);
-    ctx.stroke();
-  }
-  for (let y = 0; y < height; y += step) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(width, y);
-    ctx.stroke();
-  }
-
-  // Base Mount Platform - Deep Navy chassis with subtle Primary Blue hairline
-  ctx.fillStyle = '#1b2e3b';
-  ctx.strokeStyle = '#5289AD';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  if (ctx.roundRect) {
-    ctx.roundRect(basePos.x - 38, basePos.y, 76, 14, 4);
-  } else {
-    ctx.rect(basePos.x - 38, basePos.y, 76, 14);
-  }
-  ctx.fill();
-  ctx.stroke();
-
-  // Base mounting screws / alignment datum
-  ctx.fillStyle = '#ACBCBF';
-  ctx.beginPath();
-  ctx.arc(basePos.x - 24, basePos.y + 7, 2, 0, Math.PI * 2);
-  ctx.arc(basePos.x + 24, basePos.y + 7, 2, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.restore();
-}
-
-function drawTrail() {
-  if (trail.length < 2) return;
-  ctx.save();
-  for (let i = 1; i < trail.length; i++) {
-    const alpha = (i / trail.length) * 0.35;
-    ctx.strokeStyle = `rgba(82, 137, 173, ${alpha})`;
-    ctx.lineWidth = 1.8;
-    ctx.beginPath();
-    ctx.moveTo(trail[i - 1].x, trail[i - 1].y);
-    ctx.lineTo(trail[i].x, trail[i].y);
-    ctx.stroke();
-  }
-  ctx.restore();
-}
-
-function drawSoftArmBody(points, orientations) {
-  const leftEdge = [];
-  const rightEdge = [];
-  const dorsalSensor = [];
-  const ventralSensor = [];
-
-  for (let i = 0; i < points.length; i++) {
-    const p = points[i];
-    const angle = orientations[i];
-    const normalAngle = angle + Math.PI / 2;
-
-    // Outer silicone contours
-    const nx = Math.cos(normalAngle);
-    const ny = Math.sin(normalAngle);
-    
-    // Taper slightly towards the tip
-    const taper = 1.0 - (i / points.length) * 0.28;
-    const r = ARM_RADIUS * taper;
-
-    leftEdge.push({ x: p.x - nx * r, y: p.y - ny * r });
-    rightEdge.push({ x: p.x + nx * r, y: p.y + ny * r });
-
-    // Embedded proprioceptive sensor fiber channels
-    const sensorOffset = r * 0.62;
-    dorsalSensor.push({ x: p.x - nx * sensorOffset, y: p.y - ny * sensorOffset });
-    ventralSensor.push({ x: p.x + nx * sensorOffset, y: p.y + ny * sensorOffset });
-  }
-
-  // 1. Draw Translucent Soft Silicone Body (Skin)
-  ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(leftEdge[0].x, leftEdge[0].y);
-  for (let i = 1; i < leftEdge.length; i++) {
-    ctx.lineTo(leftEdge[i].x, leftEdge[i].y);
-  }
-  for (let i = rightEdge.length - 1; i >= 0; i--) {
-    ctx.lineTo(rightEdge[i].x, rightEdge[i].y);
-  }
-  ctx.closePath();
-
-  // Subtle material gradient using Primary Blue (#5289AD) and Muted Blue-Gray (#698696)
-  const bodyGrad = ctx.createLinearGradient(leftEdge[0].x, leftEdge[0].y, rightEdge[0].x, rightEdge[0].y);
-  bodyGrad.addColorStop(0, 'rgba(82, 137, 173, 0.22)');
-  bodyGrad.addColorStop(0.5, 'rgba(105, 134, 150, 0.14)');
-  bodyGrad.addColorStop(1, 'rgba(82, 137, 173, 0.22)');
-  ctx.fillStyle = bodyGrad;
-  ctx.fill();
-
-  ctx.strokeStyle = 'rgba(82, 137, 173, 0.55)';
-  ctx.lineWidth = 1.4;
-  ctx.stroke();
-
-  // 2. Draw Internal Vertebrae Discs / Ribs (Soft Gray)
-  for (let i = 2; i < points.length; i += 3) {
-    ctx.beginPath();
-    ctx.moveTo(leftEdge[i].x, leftEdge[i].y);
-    ctx.lineTo(rightEdge[i].x, rightEdge[i].y);
-    ctx.strokeStyle = 'rgba(172, 188, 191, 0.25)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // Central core spine marker
-    ctx.fillStyle = 'rgba(82, 137, 173, 0.65)';
-    ctx.beginPath();
-    ctx.arc(points[i].x, points[i].y, 1.8, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  // 3. Draw Embedded Proprioceptive Sensor Fibers (Tension vs Compression)
-  const dorsalStrainVal = (k1 + k2 + k3) * 50;
-
-  // Left fiber (Dorsal)
-  ctx.beginPath();
-  ctx.moveTo(dorsalSensor[0].x, dorsalSensor[0].y);
-  for (let i = 1; i < dorsalSensor.length; i++) {
-    ctx.lineTo(dorsalSensor[i].x, dorsalSensor[i].y);
-  }
-  const dorsalColor = dorsalStrainVal > 0 ? '#5289AD' : '#698696';
-  ctx.strokeStyle = dorsalColor;
-  ctx.lineWidth = 2.0;
-  ctx.shadowColor = dorsalColor;
-  ctx.shadowBlur = 5;
-  ctx.stroke();
-
-  // Right fiber (Ventral)
-  ctx.beginPath();
-  ctx.moveTo(ventralSensor[0].x, ventralSensor[0].y);
-  for (let i = 1; i < ventralSensor.length; i++) {
-    ctx.lineTo(ventralSensor[i].x, ventralSensor[i].y);
-  }
-  const ventralColor = dorsalStrainVal <= 0 ? '#5289AD' : '#698696';
-  ctx.strokeStyle = ventralColor;
-  ctx.shadowColor = ventralColor;
-  ctx.stroke();
-
-  ctx.restore();
-}
-
-function drawEndEffector(tip, angle) {
-  ctx.save();
-  ctx.translate(tip.x, tip.y);
-  ctx.rotate(angle);
-
-  // Tip mount disc - Off-White with Primary Blue subtle glow
-  ctx.fillStyle = '#F4FCFB';
-  ctx.shadowColor = '#5289AD';
-  ctx.shadowBlur = 8;
-  ctx.beginPath();
-  ctx.arc(0, 0, 4.5, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Local Coordinate axes at tip
-  ctx.shadowBlur = 0;
-  ctx.lineWidth = 1.8;
-
-  // Tangent axis (Primary Blue)
-  ctx.strokeStyle = '#5289AD';
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(15, 0);
-  ctx.stroke();
-
-  // Normal axis (Soft Gray)
-  ctx.strokeStyle = '#ACBCBF';
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(0, -11);
-  ctx.stroke();
-
-  ctx.restore();
-}
-
-function updateHUDTelemetry(tip, basePos) {
-  if (!telPos || !telCurvature || !telStrain) return;
-  // Compute relative tip coords in simulated mm
-  const dxMM = ((tip.x - basePos.x) * 1.5).toFixed(1);
-  const dyMM = ((basePos.y - tip.y) * 1.5).toFixed(1);
-  telPos.textContent = `${dxMM}, ${dyMM} mm`;
-
-  const meanCurvature = ((k1 + k2 + k3) / 3).toFixed(4);
-  telCurvature.textContent = `${meanCurvature} rad/mm`;
-
-  const strainPercent = ((k1 + k2 + k3) * 65).toFixed(2);
-  const sign = strainPercent >= 0 ? '+' : '';
-  telStrain.textContent = `Δε: ${sign}${strainPercent}%`;
-}
-
-
-// Start Hero simulation if canvas is present
-if (canvas) {
-  renderSimulation();
-}
-
 // ===================================================================
-// 3. DOC-OC CONTINUUM ROBOT KINEMATICS & MUJOCO PHYSICS ENGINE
+// 2. DOC-OC CONTINUUM ROBOT KINEMATICS & MUJOCO PHYSICS ENGINE
 // Direct Port of: https://github.com/Team-SoftRobotics/Simulations
 // ===================================================================
 
@@ -616,17 +246,21 @@ class DocOcEngine {
 }
 
 class DocOc3DViewer {
-  constructor(canvasEl, engine) {
+  constructor(canvasEl, engine, defaultView = 'iso') {
     this.canvas = canvasEl;
     this.ctx = canvasEl.getContext('2d');
     this.engine = engine;
 
-    // Default camera angles (isometric perspective)
-    this.azimuth = Math.PI / 4;   // 45 deg
-    this.elevation = 22 * Math.PI / 180; // 22 deg
+    // View configurations
+    if (defaultView === 'side') {
+      this.azimuth = Math.PI / 2;
+      this.elevation = 0;
+    } else {
+      this.azimuth = Math.PI / 4;   // 45 deg
+      this.elevation = 22 * Math.PI / 180; // 22 deg
+    }
     this.zoom = 1.0;
 
-    // Mouse & Touch drag state
     this.isDragging = false;
     this.lastMouseX = 0;
     this.lastMouseY = 0;
@@ -680,7 +314,6 @@ class DocOc3DViewer {
       this.isDragging = false;
     });
 
-    // Touch support for dragging camera
     c.addEventListener('touchstart', (e) => {
       if (e.touches.length === 1) {
         this.isDragging = true;
@@ -710,10 +343,12 @@ class DocOc3DViewer {
   resize() {
     const rect = this.canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
-    this.canvas.width = rect.width * dpr;
-    this.canvas.height = rect.height * dpr;
-    this.width = rect.width;
-    this.height = rect.height;
+    const w = rect.width || this.canvas.width || 600;
+    const h = rect.height || this.canvas.height || 380;
+    this.canvas.width = w * dpr;
+    this.canvas.height = h * dpr;
+    this.width = w;
+    this.height = h;
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
@@ -723,22 +358,20 @@ class DocOc3DViewer {
     const yRel = y;
     const zRel = z - zCenter;
 
-    // Rotate around Z by -azimuth
     const cosA = Math.cos(this.azimuth);
     const sinA = Math.sin(this.azimuth);
     const x1 = xRel * cosA + yRel * sinA;
     const y1 = -xRel * sinA + yRel * cosA;
     const z1 = zRel;
 
-    // Rotate around X by elevation
     const cosE = Math.cos(this.elevation);
     const sinE = Math.sin(this.elevation);
     const x2 = x1;
     const y2 = y1 * cosE - z1 * sinE;
     const z2 = y1 * sinE + z1 * cosE;
 
-    // Dynamic scale to fit canvas
-    const scale = Math.min(this.width, this.height) * 2.85 * this.zoom;
+    const dim = Math.max(280, Math.min(this.width, this.height));
+    const scale = dim * 2.85 * this.zoom;
     const sx = this.width * 0.5 + x2 * scale;
     const sy = this.height * 0.52 - z2 * scale;
 
@@ -1030,285 +663,331 @@ class DocOc3DViewer {
   }
 }
 
-// -------------------------------------------------------------------
-// Studio Telemetry Update & Controller Wiring
-// -------------------------------------------------------------------
+// ===================================================================
+// Instantiate Engine & Viewers for Hero Window & Kinematics Studio
+// ===================================================================
+
+const docOcEngine = new DocOcEngine();
+
+// 1. Hero Canvas Viewer
+const heroCanvas = document.getElementById('hero-arm-canvas');
+let heroViewer = null;
+if (heroCanvas) {
+  heroViewer = new DocOc3DViewer(heroCanvas, docOcEngine, 'iso');
+}
+
+// 2. Studio Canvas Viewer
 const studioCanvas = document.getElementById('studio-arm-canvas');
-let docOcEngine = null;
-let docOcViewer = null;
-
+let studioViewer = null;
 if (studioCanvas) {
-  docOcEngine = new DocOcEngine();
-  docOcViewer = new DocOc3DViewer(studioCanvas, docOcEngine);
+  studioViewer = new DocOc3DViewer(studioCanvas, docOcEngine, 'iso');
+}
 
-  // Telemetry UI Elements
-  const safetyStatusBadge = document.getElementById('safety-status-badge');
-  const statLastCmd = document.getElementById('stat-last-cmd');
-  const statTotalSteps = document.getElementById('stat-total-steps');
-  const statXSteps = document.getElementById('stat-x-steps');
-  const statYSteps = document.getElementById('stat-y-steps');
+// Telemetry DOM Bindings
+// Hero Telemetry
+const heroTelPos = document.getElementById('hero-tel-pos');
+const heroTelCurvature = document.getElementById('hero-tel-curvature');
+const heroTelStrain = document.getElementById('hero-tel-strain');
 
-  const statTipX = document.getElementById('stat-tip-x');
-  const statTipY = document.getElementById('stat-tip-y');
-  const statTipZ = document.getElementById('stat-tip-z');
-  const statTipXY = document.getElementById('stat-tip-xy');
+// Studio Telemetry
+const safetyStatusBadge = document.getElementById('safety-status-badge');
+const statLastCmd = document.getElementById('stat-last-cmd');
+const statTotalSteps = document.getElementById('stat-total-steps');
+const statXSteps = document.getElementById('stat-x-steps');
+const statYSteps = document.getElementById('stat-y-steps');
 
-  const statCurvTotal = document.getElementById('stat-curv-total');
-  const statBendAngle = document.getElementById('stat-bend-angle');
-  const statCurvX = document.getElementById('stat-curv-x');
-  const statCurvY = document.getElementById('stat-curv-y');
-  const statBendDir = document.getElementById('stat-bend-dir');
-  const statAxialStrain = document.getElementById('stat-axial-strain');
+const statTipX = document.getElementById('stat-tip-x');
+const statTipY = document.getElementById('stat-tip-y');
+const statTipZ = document.getElementById('stat-tip-z');
+const statTipXY = document.getElementById('stat-tip-xy');
 
-  const wireEls = [1, 2, 3, 4, 5, 6, 7].map(i => document.getElementById(`wire-${i}`));
-  const wireMaxEl = document.getElementById('wire-max');
-  const strainProgressBar = document.getElementById('strain-progress-bar');
+const statCurvTotal = document.getElementById('stat-curv-total');
+const statBendAngle = document.getElementById('stat-bend-angle');
+const statCurvX = document.getElementById('stat-curv-x');
+const statCurvY = document.getElementById('stat-curv-y');
+const statBendDir = document.getElementById('stat-bend-dir');
+const statAxialStrain = document.getElementById('stat-axial-strain');
 
-  const tenPxVal = document.getElementById('ten-px-val');
-  const tenPxDelta = document.getElementById('ten-px-delta');
-  const tenNxVal = document.getElementById('ten-nx-val');
-  const tenNxDelta = document.getElementById('ten-nx-delta');
-  const tenPyVal = document.getElementById('ten-py-val');
-  const tenPyDelta = document.getElementById('ten-py-delta');
-  const tenNyVal = document.getElementById('ten-ny-val');
-  const tenNyDelta = document.getElementById('ten-ny-delta');
+const wireEls = [1, 2, 3, 4, 5, 6, 7].map(i => document.getElementById(`wire-${i}`));
+const wireMaxEl = document.getElementById('wire-max');
+const strainProgressBar = document.getElementById('strain-progress-bar');
 
-  const activeKeysTag = document.getElementById('active-keys-tag');
+const tenPxVal = document.getElementById('ten-px-val');
+const tenPxDelta = document.getElementById('ten-px-delta');
+const tenNxVal = document.getElementById('ten-nx-val');
+const tenNxDelta = document.getElementById('ten-nx-delta');
+const tenPyVal = document.getElementById('ten-py-val');
+const tenPyDelta = document.getElementById('ten-py-delta');
+const tenNyVal = document.getElementById('ten-ny-val');
+const tenNyDelta = document.getElementById('ten-ny-delta');
 
-  function updateDocOcTelemetry() {
-    const pcc = docOcEngine.solvePCC();
-    const tip = docOcEngine.getTipPosition(pcc);
-    const nitinol = docOcEngine.getNitinolStrains(pcc);
-    const deltas = docOcEngine.getTendonDeltas();
+const activeKeysTag = document.getElementById('active-keys-tag');
 
-    // 1. Safety & Command State
-    if (safetyStatusBadge) {
+function updateAllTelemetry() {
+  const pcc = docOcEngine.solvePCC();
+  const tip = docOcEngine.getTipPosition(pcc);
+  const nitinol = docOcEngine.getNitinolStrains(pcc);
+  const deltas = docOcEngine.getTendonDeltas();
+
+  // Hero Window Telemetry
+  if (heroTelPos) {
+    heroTelPos.textContent = `${(tip.x * 1000).toFixed(1)}, ${(tip.y * 1000).toFixed(1)}, ${(tip.z * 1000).toFixed(1)} mm`;
+  }
+  if (heroTelCurvature) {
+    heroTelCurvature.textContent = `${pcc.curvature.toFixed(4)} 1/m (θ: ${pcc.bendingAngleDeg.toFixed(1)}°)`;
+  }
+  if (heroTelStrain) {
+    const maxTensilePct = (nitinol.maxTensile * 100).toFixed(2);
+    const statusText = docOcEngine.safetyLatched ? '[LOCKED]' : 
+                       nitinol.maxTensile >= DOCOC_PARAMS.warningStrain ? '[WARN]' : '[OK]';
+    heroTelStrain.textContent = `${maxTensilePct}% ${statusText}`;
+    heroTelStrain.style.color = docOcEngine.safetyLatched ? '#ef476f' :
+                               nitinol.maxTensile >= DOCOC_PARAMS.warningStrain ? '#ffd166' : 'var(--primary-blue)';
+  }
+
+  // Studio Window Telemetry
+  if (safetyStatusBadge) {
+    if (docOcEngine.safetyLatched) {
+      safetyStatusBadge.className = 'badge-status-locked';
+      safetyStatusBadge.textContent = 'HARD LIMIT / LOCKED';
+    } else if (nitinol.maxTensile >= DOCOC_PARAMS.warningStrain) {
+      safetyStatusBadge.className = 'badge-status-warning';
+      safetyStatusBadge.textContent = 'STRAIN WARNING';
+    } else {
+      safetyStatusBadge.className = 'badge-status-nominal';
+      safetyStatusBadge.textContent = 'NOMINAL [OK]';
+    }
+  }
+
+  if (statLastCmd) statLastCmd.textContent = docOcEngine.lastCommand;
+  if (statTotalSteps) statTotalSteps.textContent = docOcEngine.totalSteps;
+  if (statXSteps) statXSteps.innerHTML = `${docOcEngine.xSteps >= 0 ? '+' : ''}${docOcEngine.xSteps} <small>/ ±${DOCOC_PARAMS.maxCommandStepsX}</small>`;
+  if (statYSteps) statYSteps.innerHTML = `${docOcEngine.ySteps >= 0 ? '+' : ''}${docOcEngine.ySteps} <small>/ ±${DOCOC_PARAMS.maxCommandStepsY}</small>`;
+
+  if (statTipX) statTipX.textContent = `${(tip.x * 1000).toFixed(3)} mm`;
+  if (statTipY) statTipY.textContent = `${(tip.y * 1000).toFixed(3)} mm`;
+  if (statTipZ) statTipZ.textContent = `${(tip.z * 1000).toFixed(3)} mm`;
+  if (statTipXY) statTipXY.textContent = `${(tip.distXY * 1000).toFixed(3)} mm`;
+
+  if (statCurvTotal) statCurvTotal.textContent = `${pcc.curvature.toFixed(4)} 1/m`;
+  if (statBendAngle) statBendAngle.textContent = `${pcc.bendingAngleDeg.toFixed(3)} deg`;
+  if (statCurvX) statCurvX.textContent = `${pcc.kx.toFixed(4)} 1/m`;
+  if (statCurvY) statCurvY.textContent = `${pcc.ky.toFixed(4)} 1/m`;
+  if (statBendDir) statBendDir.textContent = `${pcc.directionDeg.toFixed(3)} deg`;
+  if (statAxialStrain) statAxialStrain.textContent = `${(pcc.axialStrain * 100).toFixed(4)} %`;
+
+  nitinol.strains.forEach((wire, idx) => {
+    if (wireEls[idx]) {
+      wireEls[idx].textContent = `${(wire.strain * 100).toFixed(3)}%`;
+      wireEls[idx].style.color = wire.tensile >= DOCOC_PARAMS.hardStrainLimit ? '#ef476f' :
+                                wire.tensile >= DOCOC_PARAMS.warningStrain ? '#ffd166' : 'var(--off-white)';
+    }
+  });
+
+  const maxTensilePercent = nitinol.maxTensile * 100;
+  if (wireMaxEl) {
+    wireMaxEl.textContent = `${maxTensilePercent.toFixed(3)}%`;
+    wireMaxEl.style.color = nitinol.maxTensile >= DOCOC_PARAMS.hardStrainLimit ? '#ef476f' :
+                            nitinol.maxTensile >= DOCOC_PARAMS.warningStrain ? '#ffd166' : 'var(--primary-blue)';
+  }
+
+  if (strainProgressBar) {
+    const pctOfHardLimit = Math.min(100, (nitinol.maxTensile / DOCOC_PARAMS.hardStrainLimit) * 100);
+    strainProgressBar.style.width = `${pctOfHardLimit}%`;
+    strainProgressBar.className = 'strain-progress-fill' + 
+      (nitinol.maxTensile >= DOCOC_PARAMS.hardStrainLimit ? ' locked' :
+       nitinol.maxTensile >= DOCOC_PARAMS.warningStrain ? ' warning' : '');
+  }
+
+  const L0_MM = DOCOC_PARAMS.L * 1000;
+  if (tenPxVal) tenPxVal.textContent = `${(L0_MM + deltas.px * 1000).toFixed(3)} mm`;
+  if (tenPxDelta) tenPxDelta.textContent = `Δ: ${(deltas.px * 1000).toFixed(3)} mm`;
+
+  if (tenNxVal) tenNxVal.textContent = `${(L0_MM + deltas.nx * 1000).toFixed(3)} mm`;
+  if (tenNxDelta) tenNxDelta.textContent = `Δ: ${(deltas.nx * 1000).toFixed(3)} mm`;
+
+  if (tenPyVal) tenPyVal.textContent = `${(L0_MM + deltas.py * 1000).toFixed(3)} mm`;
+  if (tenPyDelta) tenPyDelta.textContent = `Δ: ${(deltas.py * 1000).toFixed(3)} mm`;
+
+  if (tenNyVal) tenNyVal.textContent = `${(L0_MM + deltas.ny * 1000).toFixed(3)} mm`;
+  if (tenNyDelta) tenNyDelta.textContent = `Δ: ${(deltas.ny * 1000).toFixed(3)} mm`;
+
+  if (activeKeysTag) {
+    const keys = Array.from(docOcEngine.activeKeys).sort().join('+').toUpperCase();
+    activeKeysTag.textContent = keys || 'NONE';
+  }
+}
+
+// Initial render & sync
+if (heroViewer) heroViewer.render();
+if (studioViewer) studioViewer.render();
+updateAllTelemetry();
+
+// Unified Actuation Handlers (Hero and Studio buttons + Keyboard)
+let docOcRepeatTimer = null;
+let docOcInitialTimer = null;
+
+const allKeyButtons = {
+  w: [document.getElementById('hero-key-w'), document.getElementById('key-w')],
+  a: [document.getElementById('hero-key-a'), document.getElementById('key-a')],
+  s: [document.getElementById('hero-key-s'), document.getElementById('key-s')],
+  d: [document.getElementById('hero-key-d'), document.getElementById('key-d')]
+};
+
+function renderAllViewers() {
+  if (heroViewer) heroViewer.render();
+  if (studioViewer) studioViewer.render();
+}
+
+function startActuation(key) {
+  if (docOcEngine.safetyLatched) return;
+  const k = key.toLowerCase();
+  docOcEngine.activeKeys.add(k);
+
+  docOcEngine.executeStep(k);
+  updateAllTelemetry();
+  renderAllViewers();
+
+  if (allKeyButtons[k]) {
+    allKeyButtons[k].forEach(b => b?.classList.add('active'));
+  }
+
+  stopActuationTimers();
+
+  docOcInitialTimer = setTimeout(() => {
+    docOcRepeatTimer = setInterval(() => {
       if (docOcEngine.safetyLatched) {
-        safetyStatusBadge.className = 'badge-status-locked';
-        safetyStatusBadge.textContent = 'HARD LIMIT / LOCKED';
-      } else if (nitinol.maxTensile >= DOCOC_PARAMS.warningStrain) {
-        safetyStatusBadge.className = 'badge-status-warning';
-        safetyStatusBadge.textContent = 'STRAIN WARNING';
-      } else {
-        safetyStatusBadge.className = 'badge-status-nominal';
-        safetyStatusBadge.textContent = 'NOMINAL [OK]';
+        stopActuationTimers();
+        return;
       }
-    }
+      docOcEngine.executeStep(k);
+      updateAllTelemetry();
+      renderAllViewers();
+    }, DOCOC_PARAMS.repeatPeriodMs);
+  }, 180);
+}
 
-    if (statLastCmd) statLastCmd.textContent = docOcEngine.lastCommand;
-    if (statTotalSteps) statTotalSteps.textContent = docOcEngine.totalSteps;
-    if (statXSteps) statXSteps.innerHTML = `${docOcEngine.xSteps >= 0 ? '+' : ''}${docOcEngine.xSteps} <small>/ ±${DOCOC_PARAMS.maxCommandStepsX}</small>`;
-    if (statYSteps) statYSteps.innerHTML = `${docOcEngine.ySteps >= 0 ? '+' : ''}${docOcEngine.ySteps} <small>/ ±${DOCOC_PARAMS.maxCommandStepsY}</small>`;
-
-    // 2. Tip Coordinates (mm)
-    if (statTipX) statTipX.textContent = `${(tip.x * 1000).toFixed(3)} mm`;
-    if (statTipY) statTipY.textContent = `${(tip.y * 1000).toFixed(3)} mm`;
-    if (statTipZ) statTipZ.textContent = `${(tip.z * 1000).toFixed(3)} mm`;
-    if (statTipXY) statTipXY.textContent = `${(tip.distXY * 1000).toFixed(3)} mm`;
-
-    // 3. PCC Kinematics
-    if (statCurvTotal) statCurvTotal.textContent = `${pcc.curvature.toFixed(4)} 1/m`;
-    if (statBendAngle) statBendAngle.textContent = `${pcc.bendingAngleDeg.toFixed(3)} deg`;
-    if (statCurvX) statCurvX.textContent = `${pcc.kx.toFixed(4)} 1/m`;
-    if (statCurvY) statCurvY.textContent = `${pcc.ky.toFixed(4)} 1/m`;
-    if (statBendDir) statBendDir.textContent = `${pcc.directionDeg.toFixed(3)} deg`;
-    if (statAxialStrain) statAxialStrain.textContent = `${(pcc.axialStrain * 100).toFixed(4)} %`;
-
-    // 4. Nitinol Core Wires
-    nitinol.strains.forEach((wire, idx) => {
-      if (wireEls[idx]) {
-        wireEls[idx].textContent = `${(wire.strain * 100).toFixed(3)}%`;
-        wireEls[idx].style.color = wire.tensile >= DOCOC_PARAMS.hardStrainLimit ? '#ef476f' :
-                                  wire.tensile >= DOCOC_PARAMS.warningStrain ? '#ffd166' : 'var(--off-white)';
-      }
-    });
-
-    const maxTensilePercent = nitinol.maxTensile * 100;
-    if (wireMaxEl) {
-      wireMaxEl.textContent = `${maxTensilePercent.toFixed(3)}%`;
-      wireMaxEl.style.color = nitinol.maxTensile >= DOCOC_PARAMS.hardStrainLimit ? '#ef476f' :
-                              nitinol.maxTensile >= DOCOC_PARAMS.warningStrain ? '#ffd166' : 'var(--primary-blue)';
-    }
-
-    if (strainProgressBar) {
-      const pctOfHardLimit = Math.min(100, (nitinol.maxTensile / DOCOC_PARAMS.hardStrainLimit) * 100);
-      strainProgressBar.style.width = `${pctOfHardLimit}%`;
-      strainProgressBar.className = 'strain-progress-fill' + 
-        (nitinol.maxTensile >= DOCOC_PARAMS.hardStrainLimit ? ' locked' :
-         nitinol.maxTensile >= DOCOC_PARAMS.warningStrain ? ' warning' : '');
-    }
-
-    // 5. 4-Tendon Lengths & Deltas
-    const L0_MM = DOCOC_PARAMS.L * 1000;
-    if (tenPxVal) tenPxVal.textContent = `${(L0_MM + deltas.px * 1000).toFixed(3)} mm`;
-    if (tenPxDelta) tenPxDelta.textContent = `Δ: ${(deltas.px * 1000).toFixed(3)} mm`;
-
-    if (tenNxVal) tenNxVal.textContent = `${(L0_MM + deltas.nx * 1000).toFixed(3)} mm`;
-    if (tenNxDelta) tenNxDelta.textContent = `Δ: ${(deltas.nx * 1000).toFixed(3)} mm`;
-
-    if (tenPyVal) tenPyVal.textContent = `${(L0_MM + deltas.py * 1000).toFixed(3)} mm`;
-    if (tenPyDelta) tenPyDelta.textContent = `Δ: ${(deltas.py * 1000).toFixed(3)} mm`;
-
-    if (tenNyVal) tenNyVal.textContent = `${(L0_MM + deltas.ny * 1000).toFixed(3)} mm`;
-    if (tenNyDelta) tenNyDelta.textContent = `Δ: ${(deltas.ny * 1000).toFixed(3)} mm`;
-
-    // Active Key tags
-    if (activeKeysTag) {
-      const keys = Array.from(docOcEngine.activeKeys).sort().join('+').toUpperCase();
-      activeKeysTag.textContent = keys || 'NONE';
-    }
+function stopActuationTimers() {
+  if (docOcInitialTimer) {
+    clearTimeout(docOcInitialTimer);
+    docOcInitialTimer = null;
   }
+  if (docOcRepeatTimer) {
+    clearInterval(docOcRepeatTimer);
+    docOcRepeatTimer = null;
+  }
+}
 
-  // Initial render & telemetry sync
-  docOcViewer.render();
-  updateDocOcTelemetry();
-
-  // WASD Buttons
-  const wasdButtons = {
-    w: document.getElementById('key-w'),
-    a: document.getElementById('key-a'),
-    s: document.getElementById('key-s'),
-    d: document.getElementById('key-d'),
-    reset: document.getElementById('key-reset')
-  };
-
-  let docOcRepeatTimer = null;
-  let docOcInitialTimer = null;
-
-  function startActuation(key) {
-    if (docOcEngine.safetyLatched) return;
+function stopActuation(key) {
+  if (key) {
     const k = key.toLowerCase();
-    docOcEngine.activeKeys.add(k);
-
-    docOcEngine.executeStep(k);
-    updateDocOcTelemetry();
-    docOcViewer.render();
-
-    if (wasdButtons[k]) {
-      wasdButtons[k].classList.add('active');
+    docOcEngine.activeKeys.delete(k);
+    if (allKeyButtons[k]) {
+      allKeyButtons[k].forEach(b => b?.classList.remove('active'));
     }
+  }
+  stopActuationTimers();
+  updateAllTelemetry();
+}
 
+// Bind Hero and Studio Buttons
+['w', 'a', 's', 'd'].forEach(k => {
+  const heroBtn = document.getElementById(`hero-key-${k}`);
+  if (heroBtn) {
+    heroBtn.addEventListener('mousedown', (e) => { e.preventDefault(); startActuation(k); });
+    heroBtn.addEventListener('mouseup', () => stopActuation(k));
+    heroBtn.addEventListener('mouseleave', () => stopActuation(k));
+    heroBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startActuation(k); }, { passive: false });
+    heroBtn.addEventListener('touchend', () => stopActuation(k));
+    heroBtn.addEventListener('touchcancel', () => stopActuation(k));
+  }
+
+  const studioBtn = document.getElementById(`key-${k}`);
+  if (studioBtn) {
+    studioBtn.addEventListener('mousedown', (e) => { e.preventDefault(); startActuation(k); });
+    studioBtn.addEventListener('mouseup', () => stopActuation(k));
+    studioBtn.addEventListener('mouseleave', () => stopActuation(k));
+    studioBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startActuation(k); }, { passive: false });
+    studioBtn.addEventListener('touchend', () => stopActuation(k));
+    studioBtn.addEventListener('touchcancel', () => stopActuation(k));
+  }
+});
+
+// Reset Buttons
+const heroResetBtn = document.getElementById('hero-key-reset');
+if (heroResetBtn) {
+  heroResetBtn.addEventListener('click', () => {
+    docOcEngine.reset();
     stopActuationTimers();
-
-    docOcInitialTimer = setTimeout(() => {
-      docOcRepeatTimer = setInterval(() => {
-        if (docOcEngine.safetyLatched) {
-          stopActuationTimers();
-          return;
-        }
-        docOcEngine.executeStep(k);
-        updateDocOcTelemetry();
-        docOcViewer.render();
-      }, DOCOC_PARAMS.repeatPeriodMs);
-    }, 180);
-  }
-
-  function stopActuationTimers() {
-    if (docOcInitialTimer) {
-      clearTimeout(docOcInitialTimer);
-      docOcInitialTimer = null;
-    }
-    if (docOcRepeatTimer) {
-      clearInterval(docOcRepeatTimer);
-      docOcRepeatTimer = null;
-    }
-  }
-
-  function stopActuation(key) {
-    if (key) {
-      docOcEngine.activeKeys.delete(key.toLowerCase());
-      if (wasdButtons[key.toLowerCase()]) {
-        wasdButtons[key.toLowerCase()].classList.remove('active');
-      }
-    }
-    stopActuationTimers();
-    updateDocOcTelemetry();
-  }
-
-  // Attach tactile button events
-  ['w', 'a', 's', 'd'].forEach(k => {
-    const btn = wasdButtons[k];
-    if (!btn) return;
-
-    btn.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      startActuation(k);
-    });
-
-    btn.addEventListener('mouseup', () => stopActuation(k));
-    btn.addEventListener('mouseleave', () => stopActuation(k));
-
-    btn.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      startActuation(k);
-    }, { passive: false });
-
-    btn.addEventListener('touchend', () => stopActuation(k));
-    btn.addEventListener('touchcancel', () => stopActuation(k));
-  });
-
-  if (wasdButtons.reset) {
-    wasdButtons.reset.addEventListener('click', () => {
-      docOcEngine.reset();
-      stopActuationTimers();
-      updateDocOcTelemetry();
-      docOcViewer.render();
-    });
-  }
-
-  // View Angle Toggle Buttons
-  const viewBtns = {
-    iso: document.getElementById('view-iso'),
-    front: document.getElementById('view-front'),
-    side: document.getElementById('view-side'),
-    top: document.getElementById('view-top')
-  };
-
-  Object.entries(viewBtns).forEach(([viewKey, btn]) => {
-    if (!btn) return;
-    btn.addEventListener('click', () => {
-      Object.values(viewBtns).forEach(b => b?.classList.remove('active'));
-      btn.classList.add('active');
-      docOcViewer.setView(viewKey);
-      docOcViewer.render();
-    });
-  });
-
-  // Physical Keyboard Listener (WASD, Arrows, Reset)
-  window.addEventListener('keydown', (e) => {
-    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
-
-    let mappedKey = null;
-    if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') mappedKey = 'w';
-    else if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') mappedKey = 'a';
-    else if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') mappedKey = 's';
-    else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') mappedKey = 'd';
-    else if (e.key === 'r' || e.key === 'R' || e.key === 'Escape') {
-      docOcEngine.reset();
-      stopActuationTimers();
-      updateDocOcTelemetry();
-      docOcViewer.render();
-      return;
-    }
-
-    if (mappedKey && !docOcEngine.activeKeys.has(mappedKey)) {
-      e.preventDefault();
-      startActuation(mappedKey);
-    }
-  });
-
-  window.addEventListener('keyup', (e) => {
-    let mappedKey = null;
-    if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') mappedKey = 'w';
-    else if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') mappedKey = 'a';
-    else if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') mappedKey = 's';
-    else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') mappedKey = 'd';
-
-    if (mappedKey) {
-      stopActuation(mappedKey);
-    }
+    updateAllTelemetry();
+    renderAllViewers();
   });
 }
+
+const studioResetBtn = document.getElementById('key-reset');
+if (studioResetBtn) {
+  studioResetBtn.addEventListener('click', () => {
+    docOcEngine.reset();
+    stopActuationTimers();
+    updateAllTelemetry();
+    renderAllViewers();
+  });
+}
+
+// Studio View Angle Presets
+const viewBtns = {
+  iso: document.getElementById('view-iso'),
+  front: document.getElementById('view-front'),
+  side: document.getElementById('view-side'),
+  top: document.getElementById('view-top')
+};
+
+Object.entries(viewBtns).forEach(([viewKey, btn]) => {
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    Object.values(viewBtns).forEach(b => b?.classList.remove('active'));
+    btn.classList.add('active');
+    if (studioViewer) {
+      studioViewer.setView(viewKey);
+      studioViewer.render();
+    }
+  });
+});
+
+// Physical Keyboard Listener (WASD, Arrows, Reset)
+window.addEventListener('keydown', (e) => {
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+
+  let mappedKey = null;
+  if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') mappedKey = 'w';
+  else if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') mappedKey = 'a';
+  else if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') mappedKey = 's';
+  else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') mappedKey = 'd';
+  else if (e.key === 'r' || e.key === 'R' || e.key === 'Escape') {
+    docOcEngine.reset();
+    stopActuationTimers();
+    updateAllTelemetry();
+    renderAllViewers();
+    return;
+  }
+
+  if (mappedKey && !docOcEngine.activeKeys.has(mappedKey)) {
+    e.preventDefault();
+    startActuation(mappedKey);
+  }
+});
+
+window.addEventListener('keyup', (e) => {
+  let mappedKey = null;
+  if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') mappedKey = 'w';
+  else if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') mappedKey = 'a';
+  else if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') mappedKey = 's';
+  else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') mappedKey = 'd';
+
+  if (mappedKey) {
+    stopActuation(mappedKey);
+  }
+});
 
 
 // -------------------------------------------------------------------

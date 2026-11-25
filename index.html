@@ -15,7 +15,73 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=4.0" />
+  <style>
+    /* Critical Studio & Simulation Styles (Guaranteed against browser cache) */
+    .studio-canvas-shell, .simulator-hud {
+      background-color: #111e27 !important;
+      border: 1px solid rgba(172, 188, 191, 0.25) !important;
+      border-radius: 10px !important;
+      overflow: hidden !important;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35) !important;
+    }
+    .studio-canvas-wrap, .canvas-frame {
+      position: relative !important;
+      width: 100% !important;
+      height: 380px !important;
+      min-height: 380px !important;
+      background: radial-gradient(circle at 50% 50%, #182833 0%, #0d171e 100%) !important;
+    }
+    .studio-canvas-wrap canvas, .canvas-frame canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block !important;
+    }
+    .wasd-btn, .hero-wasd-btn {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      background: #1f3442 !important;
+      border: 1px solid rgba(172, 188, 191, 0.35) !important;
+      border-radius: 8px !important;
+      color: #F4FCFB !important;
+      cursor: pointer !important;
+      transition: all 0.08s ease !important;
+      box-shadow: 0 4px 0 #13212a, 0 6px 12px rgba(0, 0, 0, 0.3) !important;
+      user-select: none !important;
+      -webkit-user-select: none !important;
+      touch-action: manipulation !important;
+    }
+    .wasd-btn:hover, .hero-wasd-btn:hover {
+      background: #274152 !important;
+      border-color: #5289AD !important;
+      transform: translateY(-1px) !important;
+    }
+    .wasd-btn.active, .wasd-btn:active, .hero-wasd-btn.active, .hero-wasd-btn:active {
+      background: #5289AD !important;
+      color: #F4FCFB !important;
+      transform: translateY(3px) !important;
+      box-shadow: 0 1px 0 #13212a, 0 0 16px rgba(82, 137, 173, 0.7) !important;
+      border-color: #F4FCFB !important;
+    }
+    .view-btn {
+      background: rgba(172, 188, 191, 0.1) !important;
+      border: 1px solid rgba(172, 188, 191, 0.25) !important;
+      color: #ACBCBF !important;
+      font-size: 0.7rem !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      padding: 0.25rem 0.6rem !important;
+      border-radius: 4px !important;
+      cursor: pointer !important;
+    }
+    .view-btn.active {
+      background: #5289AD !important;
+      color: #F4FCFB !important;
+      border-color: #5289AD !important;
+      font-weight: 600 !important;
+    }
+  </style>
 </head>
 <body>
 
@@ -115,38 +181,74 @@
           </div>
         </div>
 
-        <!-- Right: Real-Time Interactive Continuum Arm Simulator -->
+        <!-- Right: Real-Time Interactive Continuum Arm Simulator Window (MuJoCo DOC-Oc) -->
         <div class="hero-viz-col">
-          <div class="simulator-hud">
-            <div class="hud-header">
-              <div class="hud-header-title">
-                <span class="status-indicator"></span>
-                <span>KINEMATICS SIMULATOR [LIVE]</span>
+          <div class="simulator-hud" style="background-color: var(--deep-navy); border: 1px solid rgba(172, 188, 191, 0.25); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-medium);">
+            <div class="hud-header" style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background-color: rgba(17, 30, 39, 0.7); border-bottom: 1px solid rgba(172, 188, 191, 0.15);">
+              <div class="hud-header-title" style="display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600; color: var(--off-white);">
+                <span class="status-indicator" style="width: 8px; height: 8px; border-radius: 50%; background: var(--primary-blue); box-shadow: 0 0 8px var(--primary-blue); display: inline-block;"></span>
+                <span>DOC-OC CONTINUUM SIMULATOR [LIVE]</span>
               </div>
-              <button id="toggle-sim-mode" class="hud-mode-btn" title="Toggle between auto-sweep and interactive cursor tracking">
-                <span id="sim-mode-text">Mode: Interactive</span>
-              </button>
+              <a href="https://github.com/Team-SoftRobotics/Simulations" target="_blank" rel="noopener noreferrer" style="text-decoration: none; font-family: var(--font-mono); font-size: 0.7rem; color: var(--soft-gray); background: rgba(172, 188, 191, 0.1); padding: 0.25rem 0.6rem; border-radius: 4px; border: 1px solid rgba(172, 188, 191, 0.2);">
+                <span>Repo: Simulations ↗</span>
+              </a>
             </div>
 
-            <div class="canvas-frame">
-              <canvas id="continuum-canvas"></canvas>
-              <div class="canvas-hint">
-                <span>Move cursor over canvas to flex arm</span>
+            <!-- 3D Canvas Viewport with explicit fallback height -->
+            <div class="canvas-frame" style="position: relative; width: 100%; height: 380px; min-height: 380px; background: radial-gradient(circle at 50% 50%, #1a2a35 0%, #0d171e 100%);">
+              <canvas id="hero-arm-canvas" width="600" height="380" style="width: 100%; height: 100%; display: block;"></canvas>
+
+              <!-- On-Screen WASD Controller Overlaid directly in the simulation window -->
+              <div class="hero-wasd-overlay" style="position: absolute; bottom: 12px; left: 12px; z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(15, 27, 35, 0.88); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(172, 188, 191, 0.2); backdrop-filter: blur(6px);">
+                <div style="font-size: 0.62rem; font-family: var(--font-mono); color: var(--soft-gray); font-weight: 600; letter-spacing: 0.05em; margin-bottom: 2px;">WASD CONTROLLER</div>
+                <div style="display: flex; gap: 4px; justify-content: center;">
+                  <button id="hero-key-w" class="hero-wasd-btn" data-key="w" title="W: +Y Bending" style="width: 44px; height: 38px; background: #243c4c; border: 1px solid rgba(172, 188, 191, 0.4); border-radius: 6px; color: var(--off-white); font-weight: 700; font-family: var(--font-mono); font-size: 0.95rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1;">
+                    <span>W</span>
+                    <span style="font-size: 0.5rem; color: var(--soft-gray); font-weight: 500;">+Y</span>
+                  </button>
+                </div>
+                <div style="display: flex; gap: 4px; justify-content: center;">
+                  <button id="hero-key-a" class="hero-wasd-btn" data-key="a" title="A: -X Bending" style="width: 44px; height: 38px; background: #243c4c; border: 1px solid rgba(172, 188, 191, 0.4); border-radius: 6px; color: var(--off-white); font-weight: 700; font-family: var(--font-mono); font-size: 0.95rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1;">
+                    <span>A</span>
+                    <span style="font-size: 0.5rem; color: var(--soft-gray); font-weight: 500;">-X</span>
+                  </button>
+                  <button id="hero-key-reset" class="hero-wasd-btn" title="Reset to neutral" style="width: 44px; height: 38px; background: #182833; border: 1px solid rgba(172, 188, 191, 0.3); border-radius: 6px; color: var(--soft-gray); font-weight: 700; font-family: var(--font-mono); font-size: 0.9rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1;">
+                    <span>⟲</span>
+                    <span style="font-size: 0.5rem; font-weight: 500;">RESET</span>
+                  </button>
+                  <button id="hero-key-d" class="hero-wasd-btn" data-key="d" title="D: +X Bending" style="width: 44px; height: 38px; background: #243c4c; border: 1px solid rgba(172, 188, 191, 0.4); border-radius: 6px; color: var(--off-white); font-weight: 700; font-family: var(--font-mono); font-size: 0.95rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1;">
+                    <span>D</span>
+                    <span style="font-size: 0.5rem; color: var(--soft-gray); font-weight: 500;">+X</span>
+                  </button>
+                </div>
+                <div style="display: flex; gap: 4px; justify-content: center;">
+                  <button id="hero-key-s" class="hero-wasd-btn" data-key="s" title="S: -Y Bending" style="width: 44px; height: 38px; background: #243c4c; border: 1px solid rgba(172, 188, 191, 0.4); border-radius: 6px; color: var(--off-white); font-weight: 700; font-family: var(--font-mono); font-size: 0.95rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1;">
+                    <span>S</span>
+                    <span style="font-size: 0.5rem; color: var(--soft-gray); font-weight: 500;">-Y</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Top-right legend / instructions -->
+              <div style="position: absolute; top: 10px; right: 12px; font-family: var(--font-mono); font-size: 0.68rem; color: var(--soft-gray); background: rgba(15, 27, 35, 0.75); padding: 5px 8px; border-radius: 4px; border: 1px solid rgba(172, 188, 191, 0.15); pointer-events: none;">
+                <div>11 Discs • 4 Tendons • 7 Wires</div>
+                <div style="color: var(--primary-blue); margin-top: 2px;">Hold / Tap WASD or Drag to Orbit</div>
               </div>
             </div>
 
-            <div class="hud-telemetry-row">
+            <!-- Real-time MuJoCo telemetry row -->
+            <div class="hud-telemetry-row" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; padding: 0.75rem 1rem; background-color: rgba(17, 30, 39, 0.85); border-top: 1px solid rgba(172, 188, 191, 0.15);">
               <div class="tel-cell">
-                <span class="tel-name">Tip Position (X, Y)</span>
-                <span class="tel-stat font-mono" id="tel-pos">0.0, 0.0 mm</span>
+                <span class="tel-name" style="font-size: 0.65rem; color: var(--soft-gray); display: block;">Tip Pose (X, Y, Z)</span>
+                <span class="tel-stat font-mono" id="hero-tel-pos" style="font-size: 0.85rem; color: var(--off-white); font-weight: 600;">0.0, 0.0, 96.0 mm</span>
               </div>
               <div class="tel-cell">
-                <span class="tel-name">Mean Curvature (κ)</span>
-                <span class="tel-stat font-mono" id="tel-curvature">0.000 rad/mm</span>
+                <span class="tel-name" style="font-size: 0.65rem; color: var(--soft-gray); display: block;">Curvature (κ)</span>
+                <span class="tel-stat font-mono" id="hero-tel-curvature" style="font-size: 0.85rem; color: var(--off-white); font-weight: 600;">0.0000 1/m</span>
               </div>
               <div class="tel-cell">
-                <span class="tel-name">Differential Strain</span>
-                <span class="tel-stat font-mono text-accent" id="tel-strain">Δε: +0.00%</span>
+                <span class="tel-name" style="font-size: 0.65rem; color: var(--soft-gray); display: block;">Max Nitinol Strain</span>
+                <span class="tel-stat font-mono text-accent" id="hero-tel-strain" style="font-size: 0.85rem; color: var(--primary-blue); font-weight: 600;">0.000% [OK]</span>
               </div>
             </div>
           </div>
@@ -274,13 +376,13 @@
         <div class="studio-main-grid">
           <!-- Left Column: 3D Visualization Viewport & WASD Control Pad -->
           <div class="studio-viewport-col">
-            <div class="studio-canvas-shell">
-              <div class="studio-canvas-topbar">
-                <div class="canvas-status-tag">
-                  <span class="studio-live-dot"></span>
+            <div class="studio-canvas-shell" style="background-color: #111e27; border: 1px solid rgba(172, 188, 191, 0.2); border-radius: 10px; overflow: hidden; box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);">
+              <div class="studio-canvas-topbar" style="display: flex; justify-content: space-between; align-items: center; padding: 0.7rem 1.15rem; background-color: rgba(36, 60, 76, 0.7); border-bottom: 1px solid rgba(172, 188, 191, 0.15);">
+                <div class="canvas-status-tag" style="display: flex; align-items: center; gap: 0.5rem; color: var(--off-white); font-size: 0.72rem; font-weight: 600;">
+                  <span class="studio-live-dot" style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--primary-blue); display: inline-block;"></span>
                   <span class="font-mono text-xs">DOC-OC MODEL • 11 DISCS (L=96mm)</span>
                 </div>
-                <div class="canvas-view-controls">
+                <div class="canvas-view-controls" style="display: flex; gap: 0.35rem;">
                   <button id="view-iso" class="view-btn active" title="Isometric 3D View">Isometric</button>
                   <button id="view-front" class="view-btn" title="Front XZ View">Front</button>
                   <button id="view-side" class="view-btn" title="Side YZ View">Side</button>
@@ -288,8 +390,8 @@
                 </div>
               </div>
 
-              <div class="studio-canvas-wrap">
-                <canvas id="studio-arm-canvas"></canvas>
+              <div class="studio-canvas-wrap" style="position: relative; width: 100%; height: 420px; min-height: 420px; background: radial-gradient(circle at 50% 50%, #182833 0%, #0d171e 100%);">
+                <canvas id="studio-arm-canvas" width="800" height="420" style="width: 100%; height: 100%; display: block;"></canvas>
                 <div class="studio-canvas-legend">
                   <span class="legend-item"><span class="legend-dot dot-px"></span>+X Tendon (px)</span>
                   <span class="legend-item"><span class="legend-dot dot-nx"></span>-X Tendon (nx)</span>
@@ -1381,6 +1483,6 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=4.0"></script>
 </body>
 </html>
